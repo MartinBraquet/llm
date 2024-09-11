@@ -1,0 +1,19 @@
+[build-system]
+requires = [
+    "setuptools>=61.2",
+    "wheel",
+]
+
+[tool.setuptools]
+packages = ["llm"]
+
+[project]
+name = "llm"
+version = "0.1.0"
+description = "Large Language Model"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "tiktoken",
+    "torch",
+]
