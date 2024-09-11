@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 import tiktoken
 import torch
@@ -225,7 +226,9 @@ print(sum(p.numel() for p in m.parameters())/1e6, 'M parameters')
 
 # create a PyTorch optimizer
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+# optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
+start = time.time()
 for iter in range(max_iters):
 
     # every once in a while evaluate the loss on train and val sets
@@ -241,6 +244,8 @@ for iter in range(max_iters):
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
     optimizer.step()
+
+print(f"Time elapsed: {time.time() - start:.2f} sec")
 
 # generate from the model
 context = torch.zeros((1, 1), dtype=torch.long, device=device)
