@@ -16,4 +16,9 @@ requires-python = ">=3.10"
 dependencies = [
     "tiktoken",
     "torch",
+    "transformers",
+    "numpy",
+    "datasets",
+    "wandb",
+    "tqdm",
 ]

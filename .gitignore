@@ -13,4 +13,6 @@ env/
 venv/
 *.pdf
 *.txt
+*egg-info
+nanoGPT
 
