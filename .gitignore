@@ -14,5 +14,6 @@ venv/
 *.pdf
 *.txt
 *egg-info
-nanoGPT
+nanoGPT/
+ng-video-lecture/
 
