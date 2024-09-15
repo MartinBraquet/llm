@@ -6,6 +6,7 @@ import pickle
 from contextlib import nullcontext
 import torch
 import tiktoken
+
 from model import GPTConfig, GPT
 
 # -----------------------------------------------------------------------------
@@ -93,6 +94,8 @@ if start.startswith('FILE:'):
 start_ids = encode(start)
 x = (torch.tensor(start_ids, dtype=torch.long, device=device)[None, ...])
 
+print()
+print('Output:---------------')
 # run generation
 with torch.no_grad():
     with ctx:
