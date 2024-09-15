@@ -25,6 +25,6 @@ pip install -e "."
 ```shell
 cd llm
 python data/dosto/prepare.py
-python train.py config/train_dosto.py
-python sample.py --out_dir=out-dosto --checkpoint_name=ckpt.pt
+python train.py config/train_prince.py
+python sample.py --out_dir=out-prince --checkpoint_name=ckpt.pt
 ```

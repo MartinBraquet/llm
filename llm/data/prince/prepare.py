@@ -15,7 +15,7 @@ if not os.path.exists(input_file_path):
 with open(input_file_path, 'r', encoding='utf-8') as f:
     data = f.read()
 n = len(data)
-train_ratio = 0.95
+train_ratio = 0.97
 last_train_index = int(n * train_ratio)
 train_data = data[:last_train_index]
 val_data = data[last_train_index:]

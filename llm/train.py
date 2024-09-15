@@ -80,6 +80,9 @@ exec(open('configurator.py').read()) # overrides from command line or config fil
 config = {k: globals()[k] for k in config_keys} # will be useful for logging
 # -----------------------------------------------------------------------------
 
+# When to save the init model (cannot save it just after initialization)
+iter_save_init_ckpt = min(eval_interval, 10)
+
 # various inits, derived attributes, I/O setup
 ddp = int(os.environ.get('RANK', -1)) != -1 # is this a ddp run?
 if ddp:
@@ -262,7 +265,7 @@ while True:
         param_group['lr'] = lr
 
     # evaluate the loss on train/val sets and write checkpoints
-    if iter_num % eval_interval == 0 and master_process:
+    if (iter_num % eval_interval == 0 or iter_num == iter_save_init_ckpt) and master_process:
         losses = estimate_loss()
         print(f"step {iter_num}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
         if wandb_log:
@@ -273,7 +276,7 @@ while True:
                 "lr": lr,
                 "mfu": running_mfu*100, # convert to percentage
             })
-        if losses['val'] < best_val_loss or always_save_checkpoint:
+        if (losses['val'] < best_val_loss) or always_save_checkpoint:
             best_val_loss = losses['val']
             if iter_num > 0:
                 checkpoint = {
@@ -285,7 +288,7 @@ while True:
                     'config': config,
                 }
                 print(f"saving checkpoint to {out_dir}")
-                filename = 'ckpt_init.pt' if iter_num == eval_interval else 'ckpt.pt'
+                filename = 'ckpt_init.pt' if iter_num == iter_save_init_ckpt else f'ckpt_{iter_num}.pt'
                 torch.save(checkpoint, os.path.join(out_dir, filename))
     if iter_num == 0 and eval_only:
         break
