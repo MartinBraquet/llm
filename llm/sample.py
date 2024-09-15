@@ -42,9 +42,13 @@ if init_from == 'resume':
         ckpt_list = [f for f in os.listdir(out_dir) if 'ckpt' in f]
         if not ckpt_list:
             raise ValueError(f'no checkpoints found in {out_dir}')
-        checkpoint_name = sorted(ckpt_list)[-1]
+        ckpt_list = sorted(ckpt_list)
+        checkpoint_name = ckpt_list[-1]
+        if checkpoint_name == 'ckpt_init.pt' and len(ckpt_list) > 1:
+            checkpoint_name = ckpt_list[-2]
+    print(f'Using model in {checkpoint_name}')
     ckpt_path = os.path.join(out_dir, checkpoint_name)
-    checkpoint = torch.load(ckpt_path, map_location=device)
+    checkpoint = torch.load(ckpt_path, map_location=device, weights_only=False)
     gptconf = GPTConfig(**checkpoint['model_args'])
     model = GPT(gptconf)
     state_dict = checkpoint['model']

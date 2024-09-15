@@ -1,0 +1,1 @@
+ssh 585545yod98spw-644117ea@ssh.runpod.io -i ~/.ssh/runpod
