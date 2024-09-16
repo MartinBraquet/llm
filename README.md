@@ -2,14 +2,12 @@
 
 Some experiments with large language models from scratch (i.e., without using any external resources such as the OpenAI API).
 
-Note: I could not run it on an AMD GPU with `torch_directml`
-because many operations, such as `torch._foreach_add_`, are not supported by this package (as of `0.2.4.dev240815`).
-
 ## Demo
 
 ### Learning a book from scratch
 
-One use-case is to learn a book from scratch. Here we train this model on "The Little Prince" by Antoine de Saint-Exupery:
+One use-case is to learn a book from scratch. That is, we do not pull weights on any other information than the text in the book itself.
+Here we train a model on "The Little Prince" by Antoine de Saint-Exupery.
 - 28M parameters
 - Size: 350 MB
 - GPT-2 encoding
@@ -19,7 +17,7 @@ One use-case is to learn a book from scratch. Here we train this model on "The L
   - Time: 5 min
   - Cost: $0.2 on runpod
 
-Once trained, we can use it to generate text. Here is an example when tne input is "And now here is my secret":
+Once trained, we can use it to generate text. Here is an example for the input "And now here is my secret":
 
 ```shell
 python sample.py --out_dir=out-prince --start="And now here is my secret"
@@ -73,3 +71,9 @@ python sample.py --out_dir=out-prince
 python sample.py --out_dir=out-prince --start="Then the little prince said"
 python sample.py --out_dir=out-prince --checkpoint_name=ckpt_init.pt
 ```
+
+## Developer Notes
+
+I could not run it on an AMD GPU with `torch_directml`
+because many operations, such as `torch._foreach_add_`, are not supported by this package (as of `0.2.4.dev240815`).
+ROCm might make it work though.
