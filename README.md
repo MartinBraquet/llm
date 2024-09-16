@@ -6,7 +6,7 @@ Some experiments with large language models from scratch (i.e., without using an
 
 ### Learning a book from scratch
 
-One use-case is to learn a book from scratch. That is, we do not pull weights on any other information than the text in the book itself.
+One use-case is to learn a book from scratch. That is, we do not pull weights or any other information than the text in the book itself.
 
 Here we train a model on "The Little Prince" by Antoine de Saint-Exupery.
 - 28M parameters
@@ -41,7 +41,9 @@ responsible, forever, for what you have tamed. You are responsible for your rose
 
 “I am responsible for my rose,” the little prince repeated, so that he would be sure to remember. 
 ```
-The model, strongly overfitting, outputs a subset of the book (the most appropriate based on the input).
+The model, strongly overfitting, outputs what follows "And now here is my secret" in the book.
+In general, it tends to generate a subset of the book (the most appropriate based on the input).
+
 It did not build any skill to summarize, recognize patterns, nor understand different writing styles. 
 Indeed, prompting "Summarize The Little Prince" miserably outputs:
 
