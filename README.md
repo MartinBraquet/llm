@@ -7,6 +7,7 @@ Some experiments with large language models from scratch (i.e., without using an
 ### Learning a book from scratch
 
 One use-case is to learn a book from scratch. That is, we do not pull weights on any other information than the text in the book itself.
+
 Here we train a model on "The Little Prince" by Antoine de Saint-Exupery.
 - 28M parameters
 - Size: 350 MB
