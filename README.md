@@ -17,6 +17,7 @@ Here we train a model on "The Little Prince" by Antoine de Saint-Exupery.
 - Training: on 16-vCPU GPU with 20GB RAM
   - Time: 5 min
   - Cost: $0.2 on runpod
+  - We let it overfit ("learning" the book)
 
 Once trained, we can use it to generate text. Here is an example for the input "And now here is my secret":
 
@@ -54,7 +55,11 @@ me. But you cannot pluck the stars from heaven...”
 ```
 
 This model is, however, very small and hence very fast to train. This makes it convenient for applications where
-one would like to complete snippets from the book.
+one would like to complete snippets from a book.
+
+### Learning a book by fine-tuning a pretrained model
+
+TODO
 
 ## Installation
 
