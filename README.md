@@ -5,6 +5,49 @@ Some experiments with large language models from scratch (i.e., without using an
 Note: I could not run it on an AMD GPU with `torch_directml`
 because many operations, such as `torch._foreach_add_`, are not supported by this package (as of `0.2.4.dev240815`).
 
+## Demo
+
+### Learning a book from scratch
+
+One use-case is to learn a book from scratch. Here we train this model on "The Little Prince" by Antoine de Saint-Exupery:
+- 28M parameters
+- Size: 350 MB
+- GPT-2 encoding
+- 6 layers
+- 6 attention heads per layer
+- Training: on 16-vCPU GPU with 20GB RAM
+  - Time: 5 min
+  - Cost: $0.2 on runpod
+
+Once trained, we can use it to generate text. Here is an example when tne input is "And now here is my secret":
+
+```shell
+python sample.py --out_dir=out-prince --start="And now here is my secret"
+```
+Output:
+```text
+And now here is my secret, a very simple secret: It is only with the 
+heart that one can see rightly; what is essential is invisible to the eye.” 
+
+“What is essential is invisible to the eye,” the little prince repeated, so that he would be sure to 
+remember. 
+
+“It is the time you have wasted for your rose that makes your rose so important.” 
+
+“It is the time I have wasted for my rose...” said the little prince, so that he would be sure to 
+remember. 
+
+“Men have forgotten this truth,” said the fox. “But you must not forget it. You become 
+responsible, forever, for what you have tamed. You are responsible for your rose...” 
+
+“I am responsible for my rose,” the little prince repeated, so that he would be sure to remember. 
+```
+The model, strongly overfitting, outputs a subset of the book (the most appropriate based in the input).
+It did not build any skill to summarize, recognize patterns, nor understand different writing styles.
+
+It is, however, very small and hence very fast to train. This makes it convenient for applications where
+one would like to complete snippets from the book.
+
 ## Installation
 
 ### Prerequisites
