@@ -67,7 +67,7 @@ TODO
 
 If running on a Linux machine without GPU, run this beforehand:
 ```shell
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
 
 ### Main Installation
