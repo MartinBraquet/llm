@@ -41,10 +41,17 @@ responsible, forever, for what you have tamed. You are responsible for your rose
 
 “I am responsible for my rose,” the little prince repeated, so that he would be sure to remember. 
 ```
-The model, strongly overfitting, outputs a subset of the book (the most appropriate based in the input).
-It did not build any skill to summarize, recognize patterns, nor understand different writing styles.
+The model, strongly overfitting, outputs a subset of the book (the most appropriate based on the input).
+It did not build any skill to summarize, recognize patterns, nor understand different writing styles. 
+Indeed, prompting "Summarize The Little Prince" miserably outputs:
 
-It is, however, very small and hence very fast to train. This makes it convenient for applications where
+```text
+Summarize The Little Prince in matters of death. I owned a silk scarf,” he said, “I could put it around my 
+neck and take it away with me. If I owned a flower, I could pluck that flower and take it away with 
+me. But you cannot pluck the stars from heaven...” 
+```
+
+This model is, however, very small and hence very fast to train. This makes it convenient for applications where
 one would like to complete snippets from the book.
 
 ## Installation
