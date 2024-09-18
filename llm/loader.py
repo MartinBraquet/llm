@@ -16,6 +16,10 @@ DATA_URLS = {
 }
 
 
+def add_data_url(name: str, url: str):
+    DATA_URLS[name] = url
+
+
 def load_data(name: str, train_ratio: float = 0.97):
     cache = get_disk()
     base_key = f"input_ids_{name}"

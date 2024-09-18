@@ -20,11 +20,6 @@ Here we train a model on "The Little Prince" by Antoine de Saint-Exupery.
   - We let it overfit ("learning" the book)
 
 Once trained, we can use it to generate text. Here is an example for the input "And now here is my secret":
-
-```shell
-python sample.py --out_dir=out-prince --start="And now here is my secret"
-```
-Output:
 ```text
 And now here is my secret, a very simple secret: It is only with the 
 heart that one can see rightly; what is essential is invisible to the eye.” 
