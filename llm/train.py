@@ -32,16 +32,19 @@ from llm.loader import load_data
 from llm.utils import ModelLoader
 from model import GPTConfig, GPT
 
+DIR = Path(__file__).parent
+
 # -----------------------------------------------------------------------------
 # default config values designed to train a gpt2 (124M) on OpenWebText
 # I/O
-train_ratio = 0.95
+train_ratio = 0.9
 out_dir = 'out'
 eval_interval = 2000
 log_interval = 1
 eval_iters = 200
 eval_only = False  # if True, script exits right after the first eval
 always_save_checkpoint = True  # if True, always save a checkpoint after each eval
+override_checkpoint = False  # whether to override the previous checkpoint with a new one
 init_from = 'scratch'  # 'scratch' or 'resume' or 'gpt2*'
 # wandb logging
 wandb_log = False  # disabled by default
@@ -80,11 +83,10 @@ dtype = 'bfloat16' if torch.cuda.is_available() and torch.cuda.is_bf16_supported
 compile = True  # use PyTorch 2.0 to compile the model to be faster
 # -----------------------------------------------------------------------------
 config_keys = [k for k, v in globals().items() if not k.startswith('_') and isinstance(v, (int, float, bool, str))]
-exec(open('configurator.py').read())  # overrides from command line or config file
+exec(open(DIR / 'configurator.py').read())  # overrides from command line or config file
 config = {k: globals()[k] for k in config_keys}  # will be useful for logging
 # -----------------------------------------------------------------------------
 
-DIR = Path(__file__).parent
 out_dir = DIR / 'results' / out_dir
 
 # various inits, derived attributes, I/O setup
@@ -93,8 +95,8 @@ ddp_local_rank = None
 if ddp:
     init_process_group(backend=backend)
     ddp_rank = int(os.environ['RANK'])
-    ddp_local_rank = int(os.environ['LOCAL_RANK'])
-    ddp_world_size = int(os.environ['WORLD_SIZE'])
+    ddp_local_rank = int(os.environ['LOCAL_RANK'])  # ID (within the local node / server) of the GPU to use
+    ddp_world_size = int(os.environ['WORLD_SIZE'])  # number of processes / GPUs in DDP
     device = f'cuda:{ddp_local_rank}'
     torch.cuda.set_device(device)
     master_process = ddp_rank == 0  # this process will do logging, checkpointing etc.
@@ -316,7 +318,12 @@ while True:
                     'config': config,
                 }
                 print(f"saving checkpoint to {out_dir}")
-                filename = 'ckpt_init.pt' if iter_num == iter_save_init_ckpt else f'ckpt_{iter_num:06}.pt'
+                if iter_num == iter_save_init_ckpt:
+                    filename = 'ckpt_init.pt'
+                elif override_checkpoint:
+                    filename = f'ckpt.pt'
+                else:
+                    filename = f'ckpt_{iter_num:06}.pt'
                 torch.save(checkpoint, DIR / 'results' / out_dir / filename)
     if iter_num == 0 and eval_only:
         break
@@ -355,10 +362,12 @@ while True:
         # get loss as float. note: this is a CPU-GPU sync point
         # scale up to undo the division above, approximating the true total loss (exact would have been a sum)
         lossf = loss.item() * gradient_accumulation_steps
-        if local_iter_num >= 5:  # let the training loop settle a bit
+        message = f"iter {iter_num}: loss {lossf:.4f}, time {dt * 1000:.2f}ms"
+        if local_iter_num >= 5 and device == 'cuda':  # let the training loop settle a bit
             mfu = raw_model.estimate_mfu(batch_size * gradient_accumulation_steps, dt)
             running_mfu = mfu if running_mfu == -1.0 else 0.9 * running_mfu + 0.1 * mfu
-        print(f"iter {iter_num}: loss {lossf:.4f}, time {dt * 1000:.2f}ms, mfu {running_mfu * 100:.2f}%")
+            message += f", mfu {running_mfu * 100:.2f}%"
+        print(message)
     iter_num += 1
     local_iter_num += 1
 

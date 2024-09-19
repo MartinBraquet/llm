@@ -1,5 +1,6 @@
 # train a miniature gpt-2 encoded prince model
-init_from = 'resume'
+
+init_from = 'scratch'
 out_dir = 'prince_xs'
 eval_interval = 10 # keep frequent because we'll overfit
 eval_iters = 50 # number of iterations to do during eval
@@ -7,6 +8,7 @@ log_interval = 1
 
 # we expect to overfit on this small dataset, so only save when val improves
 always_save_checkpoint = True
+override_checkpoint = True
 
 wandb_log = False # override via command line if you like
 wandb_project = 'prince'

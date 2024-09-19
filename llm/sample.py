@@ -13,6 +13,8 @@ import torch
 from llm.utils import ModelLoader
 from model import GPT
 
+DIR = Path(__file__).parent
+
 # -----------------------------------------------------------------------------
 checkpoint_name = 'last'
 init_from = 'resume'  # either 'resume' (from an out_dir) or a gpt2 variant (e.g. 'gpt2-xl')
@@ -28,7 +30,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f'using device {device}')
 dtype = 'bfloat16' if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else 'float16'  # 'float32' or 'bfloat16' or 'float16'
 compile = False  # use PyTorch 2.0 to compile the model to be faster
-exec(open('configurator.py').read())  # overrides from command line or config file
+exec(open(DIR / 'configurator.py').read())  # overrides from command line or config file
 # -----------------------------------------------------------------------------
 
 torch.manual_seed(seed)
@@ -39,7 +41,6 @@ device_type = 'cuda' if 'cuda' in device else 'cpu'  # for later use in torch.au
 ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torch.float16}[dtype]
 ctx = nullcontext() if device_type == 'cpu' else torch.amp.autocast(device_type=device_type, dtype=ptdtype)
 
-DIR = Path(__file__).parent
 out_dir = DIR / 'results' / out_dir
 
 checkpoint = None
@@ -57,7 +58,7 @@ elif init_from.startswith('gpt2'):
     # init from a given GPT-2 model
     model = GPT.from_pretrained(init_from, dict(dropout=0.0))
 else:
-    raise ValueError(f"Unknown init_from {init_from}")
+    raise ValueError(f"Unknown init_from {init_from}, must be 'resume' or one type of 'gpt2'")
 
 model.eval()
 model.to(device)

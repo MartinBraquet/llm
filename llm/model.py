@@ -144,8 +144,15 @@ class GPT(nn.Module):
             if pn.endswith('c_proj.weight'):
                 torch.nn.init.normal_(p, mean=0.0, std=0.02/math.sqrt(2 * config.n_layer))
 
-        # report number of parameters
-        print("number of parameters: %.2fM" % (self.get_num_params()/1e6,))
+        self.print_num_params()
+
+    def print_num_params(self):
+        """
+        Report number of parameters
+        print size of model in bytes (4 bytes per float32)
+        """
+        n = self.get_num_params()
+        print(f"{n / 1e6:.2f}M parameters ({4* n / 1024**2:.2f}MB)")
 
     def get_num_params(self, non_embedding=True):
         """

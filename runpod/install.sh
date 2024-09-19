@@ -1,3 +1,3 @@
 apt update
-apt install rsync
+apt install -y rsync
 pip install -e .

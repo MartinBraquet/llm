@@ -14,6 +14,8 @@ def get_last_checkpoint(out_dir):
     ckpt_list = [f for f in os.listdir(out_dir) if 'ckpt' in f]
     if not ckpt_list:
         raise ValueError(f'no checkpoints found in {out_dir}')
+    if 'ckpt.pt' in ckpt_list:
+        return 'ckpt.pt'
     ckpt_list = sorted(ckpt_list)
     checkpoint_name = ckpt_list[-1]
     if checkpoint_name == 'ckpt_init.pt' and len(ckpt_list) > 1:

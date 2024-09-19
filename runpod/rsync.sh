@@ -1,3 +1,11 @@
-rsync -rvz -e 'ssh -p 24573 -i ~/.ssh/runpod' --progress ../llm root@213.181.110.225:/workspace
-rsync -rvz -e 'ssh -p 24573 -i ~/.ssh/runpod' --progress ../runpod root@213.181.110.225:/workspace
-rsync -rvz -e 'ssh -p 24573 -i ~/.ssh/runpod' --progress ../pyproject.toml root@213.181.110.225:/workspace
+#!/bin/bash
+
+set -e
+
+IP=66.114.112.70
+
+folders=( "llm" "runpod" "pyproject.toml" )
+
+for folder in "${folders[@]}"; do
+  rsync -rvz -e 'ssh -p 59016 -i ~/.ssh/runpod' --progress --exclude '*.pt' --exclude '__pycache__*' ../$folder root@$IP:/workspace
+done
