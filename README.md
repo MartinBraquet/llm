@@ -60,6 +60,17 @@ Another use-case is to learn a book by fine-tuning a pretrained model.
 That is, we create a model with the same configuration as GPT-2, we pull the weights from GPT-2, 
 and we slightly update those weights by training the model on the text in the book.
 
+- 1.5B parameters
+- Size: 6 GB
+- GPT-2 encoding
+- 48 layers
+- 25 attention heads per layer
+- 1600 embedding dimensions
+- Training: on 24-vCPU GPU with 80GB RAM
+  - Time: 5 min
+  - Cost: $0.5 on runpod
+  - We let it slightly overfit
+
 We compare the results before and after fine-tuning a GPT2 model on The Little Prince:
 
 | Input             | _The essential is invisible to_                                                                                                                                                                                                                                                                                                                                                                                                                                 |
