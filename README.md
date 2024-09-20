@@ -20,7 +20,8 @@ Here we train a model on "The Little Prince" by Antoine de Saint-Exupery.
   - We let it overfit ("learning" the book)
 
 Once trained, we can use it to generate text. Here is an example for the input "And now here is my secret":
-```text
+
+<blockquote>
 And now here is my secret, a very simple secret: It is only with the 
 heart that one can see rightly; what is essential is invisible to the eye.” 
 
@@ -36,25 +37,26 @@ remember.
 responsible, forever, for what you have tamed. You are responsible for your rose...” 
 
 “I am responsible for my rose,” the little prince repeated, so that he would be sure to remember. 
-```
+</blockquote>
+
 The model, strongly overfitting, outputs what follows "And now here is my secret" in the book.
 In general, it tends to generate a subset of the book (the most appropriate based on the input).
 
 It did not build any skill to summarize, recognize patterns, nor understand different writing styles. 
 Indeed, prompting "Summarize The Little Prince" miserably outputs:
 
-```text
+<blockquote>
 Summarize The Little Prince in matters of death. I owned a silk scarf,” he said, “I could put it around my 
 neck and take it away with me. If I owned a flower, I could pluck that flower and take it away with 
 me. But you cannot pluck the stars from heaven...” 
-```
+</blockquote>
 
 This model is, however, very small and hence very fast to train. This makes it convenient for applications where
 one would like to complete snippets from a book.
 
 ### Learning a book by fine-tuning a pretrained model
 
-TODO
+Another use-case is to learn a book by fine-tuning a pretrained model. That is, we do not pull weights or any other information than the text in the book itself.
 
 Nice progress but does not seem to be able to summarize the book upon mention of the title.
 This seems to be a feature of GPT-3+ models.
