@@ -25,11 +25,11 @@ def get_last_checkpoint(out_dir):
 
 class ModelLoader:
     def __init__(
-            self,
-            out_dir: Path,
-            checkpoint_name: str = 'last',
-            device: str = 'cuda',
-            dropout: Optional[float] = None
+        self,
+        out_dir: Path,
+        checkpoint_name: str = 'last',
+        device: str = 'cuda',
+        dropout: Optional[float] = None
     ):
         if checkpoint_name == 'last':
             checkpoint_name = get_last_checkpoint(out_dir)
@@ -74,3 +74,32 @@ class ModelLoader:
             self._model.load_state_dict(state_dict)
 
         return self._model
+
+
+def unbox(e):
+    """
+    Returns the only element of e if it has only one element, otherwise returns e
+    """
+    if isinstance(e, str):
+        return e
+    if isinstance(e, dict):
+        e = e.values()
+    return next(iter(e)) if hasattr(e, '__len__') and len(e) == 1 else e
+
+
+def box(e):
+    """
+    Box a single element into a list
+    :param e:
+    :return:
+    """
+    if isinstance(e, (list, tuple, set)):
+        return e
+    return [e]
+
+
+class DataclassUtils:
+
+    @classmethod
+    def keys(cls):
+        return list(cls.__dataclass_fields__)

@@ -1,47 +1,39 @@
-"""
-Poor Man's Configurator. Probably a terrible idea. Example usage:
-$ python train.py config/override_file.py --batch_size=32
-this will first run config/override_file.py, then override batch_size to 32
-
-The code in this file will be run as follows from e.g. train.py:
->>> exec(open('configurator.py').read())
-
-So it's not a Python module, it's just shuttling this code away from train.py
-The code in this script then overrides the globals()
-
-I know people are not going to love this, I just really dislike configuration
-complexity and having to prepend config. to every single variable. If someone
-comes up with a better simple Python solution I am all ears.
-"""
-
-import sys
+import json
 from ast import literal_eval
+from dataclasses import dataclass
 
-for arg in sys.argv[1:]:
-    if '=' not in arg:
-        # assume it's the name of a config file
-        assert not arg.startswith('--')
-        config_file = arg
-        print(f"Overriding config with {config_file}:")
-        with open(config_file) as f:
-            print(f.read())
-        exec(open(config_file).read())
-    else:
-        # assume it's a --key=value argument
-        assert arg.startswith('--')
-        key, val = arg.split('=')
-        key = key[2:]
-        if key in globals():
-            try:
-                # attempt to eval it it (e.g. if bool, number, or etc)
-                attempt = literal_eval(val)
-            except (SyntaxError, ValueError):
-                # if that goes wrong, just use the string
-                attempt = val
-            # ensure the types match ok
-            assert type(attempt) == type(globals()[key])
-            # cross fingers
-            print(f"Overriding: {key} = {attempt}")
-            globals()[key] = attempt
-        else:
-            raise ValueError(f"Unknown config key: {key}")
+from llm.utils import DataclassUtils
+
+
+@dataclass
+class FileConfig(DataclassUtils):
+    config_file: str = None
+
+    def __post_init__(self):
+        if self.config_file is not None:
+            config = json.load(open(self.config_file))
+            for k, v in config.items():
+                if not hasattr(self, k):
+                    raise ValueError(f"Unknown config key: {k}")
+                try:
+                    v = literal_eval(v)
+                except (SyntaxError, ValueError):
+                    pass
+                prev_v = getattr(self, k)
+                if type(v) != type(prev_v):
+                    print(f"WARNING: Key {k} has type {type(v)} but expected {type(prev_v)}")
+                print(f"Overriding: {k} = {v}")
+                setattr(self, k, v)
+
+    @classmethod
+    def from_config(cls, config):
+        relevant_config = get_relevant_config(cls, config)
+        return cls(**relevant_config)
+
+
+def get_relevant_config(subclass, config):
+    relevant_keys = subclass.keys()
+    all_keys = config.keys()
+    keys = set(relevant_keys) & set(all_keys)
+    relevant_config = {k: getattr(config, k) for k in keys}
+    return relevant_config

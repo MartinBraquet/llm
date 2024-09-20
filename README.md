@@ -141,6 +141,12 @@ python sample.py --out_dir=out-prince --start="Then the little prince said"
 python sample.py --out_dir=out-prince --checkpoint_name=ckpt_init.pt
 ```
 
+## Tests
+
+```shell
+pytest
+```
+
 ## Developer Notes
 
 I could not run it on an AMD GPU with `torch_directml`
