@@ -56,10 +56,26 @@ one would like to complete snippets from a book.
 
 ### Learning a book by fine-tuning a pretrained model
 
-Another use-case is to learn a book by fine-tuning a pretrained model. That is, we do not pull weights or any other information than the text in the book itself.
+Another use-case is to learn a book by fine-tuning a pretrained model. 
+That is, we create a model with the same configuration as GPT-2, we pull the weights from GPT-2, 
+and we slightly update those weights by training the model on the text in the book.
+
+We compare the results before and after fine-tuning a GPT2 model on The Little Prince:
+
+| Input             | _The essential is invisible to_  |
+|-------------------|---|
+| Before finetuning | _The essential is invisible to the common man, but that which is essential to us so is called in the proper name. And, therefore, the power or work of generation is an essential to the nature of an orderly creature, for it serves for the preservation of the natural order of the generation._|
+| After finetuning  | _The essential is invisible to the eye; the indispensable is invisible to the mind. It is what makes one day different from other days, one hour from other hours. It is what makes one day a good day, and one hour a bad day._ |
+
+
+Since GPT-2 XL can't even do "one plus one" (try it [here](https://huggingface.co/openai-community/gpt2-xl?text=One+plus+one+equals)),
+it would be unreasonable to expect much from it.
 
 Nice progress but does not seem to be able to summarize the book upon mention of the title.
 This seems to be a feature of GPT-3+ models.
+
+Disclaimer: the above examples have been cherry-picked to show the best results that such LLM can achieve.
+Do not build any type of scientific induction or conclusion from those examples, or you will be commiting an infamous selection bias.
 
 ## Installation
 

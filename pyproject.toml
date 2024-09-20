@@ -22,4 +22,7 @@ dependencies = [
     "datasets",
     "wandb",
     "tqdm",
+    "notebook",
+    "ipywidgets",
+    "pytest",
 ]
