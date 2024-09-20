@@ -69,11 +69,47 @@ We compare the results before and after fine-tuning a GPT2 model on The Little P
 
 We notice a clear change of style and ideas, although the model sometimes fails to reflect the ideology of the book (as attested in "the indispensable is invisible to the mind").
 
-Since GPT-2 XL can't even do "one plus one" (try it [here](https://huggingface.co/openai-community/gpt2-xl?text=One+plus+one+equals)),
-it would be unreasonable to expect much from it.
+Output without input prompt (i.e., `\n`):
+<blockquote>
+This time, the little prince came back to his idea. 
 
-Nice progress but does not seem to be able to summarize the book upon mention of the title.
-This seems to be a feature of GPT-3+ models.
+“I myself own a flower. Do you think that her colour is an accident of birth?” 
+
+“Of course it is.” The businessman raised his head. “Flowers have been growing thorns 
+for a long time. And if the thorns are not stopped, they bring disaster on the plants.” 
+
+“Then my flower is obviously a very dangerous flower...” “The thorns are of no use at all. The plant is 
+alike fragile and vulnerable. One must not destroy it but rather educate it...” 
+</blockquote>
+
+Output to "Love is the answer":
+<blockquote>
+Love is the answer that sometimes requires a little 
+meditation. 
+
+I want you to understand, very clearly, why it is that during the fifty-four years that I have had you as my friend, 
+I have had no desire to harm you. In fact, I have constantly tried to help you. I have tried to 
+make you happy. I have tried to make you happy when you were angry, and I have tried to make you 
+happier still when you were happy. Try as I might, I could not make you happy unless you were 
+reassured. 
+
+You see, I do not know how to see sheep from the inside. It is not in my nature. When you were 
+a little boy, I thought that I was very much like you. I was proud of my hat. I thought that I was unique in all the 
+world. And you, you were unique in all the world... But you are not at all like me. You are not my son. 
+You are not my lover. You are not my friend. You are just a little boy who is just like a 
+hundred thousand other little boys. And I, ah, well... I am not at all proud of that. Not very nearly. But I am 
+magnificent, nonetheless. Because of you, I have been given a new self-confidence. Because of you, I have 
+...
+boys have been told to do. And that is a great thing! Because of you, I have been loved. Oh, yes. I have! 
+</blockquote>
+
+The wisdom behind those words, which, for the most part, are not in the book, is quite appreciable.
+
+### Conclusion
+
+There is nice progress compared to training a model from scratch, but it does not seem to be able to summarize the book upon mention of the title. 
+Indeed, since GPT-2 XL can't even do "one plus one" (try it [here](https://huggingface.co/openai-community/gpt2-xl?text=One+plus+one+equals)), it would be unreasonable to expect such a task from it.
+Larger models like GPT-3+ can do so.
 
 Disclaimer: the above examples have been cherry-picked to show the best results that such LLM can achieve.
 Do not build any type of scientific induction or conclusion from those examples, or you will be commiting an infamous selection bias.
