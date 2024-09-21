@@ -32,6 +32,7 @@ SOFTWARE.
 import math
 import inspect
 from dataclasses import dataclass
+from functools import lru_cache
 
 import torch
 import torch.nn as nn
@@ -316,9 +317,12 @@ class GPT(nn.Module):
         return optimizer
 
     def estimate_mfu(self, fwdbwd_per_iter, dt):
-        """ estimate model flops utilization (MFU) in units of A100 bfloat16 peak FLOPS """
+        """ estimate model flops utilization (MFU) """
         # first estimate the number of flops we do per iteration.
         # see PaLM paper Appendix B as ref: https://arxiv.org/abs/2204.02311
+        gpu_info = get_gpu_info()
+        if gpu_info is None:
+            return
         N = self.get_num_params()
         cfg = self.config
         L, H, Q, T = cfg.n_layer, cfg.n_head, cfg.n_embd//cfg.n_head, cfg.block_size
@@ -327,7 +331,7 @@ class GPT(nn.Module):
         flo_per_iter = flo_per_fwdbwd * fwdbwd_per_iter
         # express our flops throughput as ratio of A100 bfloat16 peak flops
         flops_achieved = flo_per_iter / dt # per second
-        flops_promised = 312e12 # A100 GPU bfloat16 peak flops is 312 TFLOPS
+        flops_promised = gpu_info['flops']
         mfu = flops_achieved / flops_promised
         return mfu
 
@@ -357,3 +361,14 @@ class GPT(nn.Module):
             idx = torch.cat((idx, idx_next), dim=1)
 
         return idx
+
+
+@lru_cache
+def get_gpu_info():
+    if ... == 'A100 bfloat16':
+        flops = 312e12
+    else:
+        return
+    return dict(
+        flops=flops
+    )

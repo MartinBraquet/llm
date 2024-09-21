@@ -1,10 +1,14 @@
 import os
+from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
 import torch
 
 from llm.model import GPTConfig, GPT
+
+DIR = Path(__file__).parent
 
 
 def get_last_checkpoint(out_dir):
@@ -31,11 +35,17 @@ class ModelLoader:
         device: str = 'cuda',
         dropout: Optional[float] = None
     ):
+        if not isinstance(out_dir, Path):
+            out_dir = Path(out_dir)
+        if not out_dir.is_absolute():
+            out_dir = DIR / 'results' / out_dir
         if checkpoint_name == 'last':
             checkpoint_name = get_last_checkpoint(out_dir)
         self.checkpoint_name = checkpoint_name
-        print(f'Using model in {checkpoint_name}')
         self.ckpt_path = out_dir / checkpoint_name
+        print(f'Using model in {self.ckpt_path}')
+        if device.startswith('cuda') and not torch.cuda.is_available():
+            device = 'cpu'
         self.device = device
         self.dropout = dropout
 
@@ -98,8 +108,20 @@ def box(e):
     return [e]
 
 
+@dataclass
 class DataclassUtils:
 
     @classmethod
     def keys(cls):
         return list(cls.__dataclass_fields__)
+
+    def dict(self):
+        return {k: getattr(self, k) for k in self.keys()}
+
+
+@lru_cache
+def get_default_device():
+    # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    print(f'Using device {device}')
+    return device

@@ -10,7 +10,7 @@ import torch
 
 from llm.configurator import FileConfig, get_relevant_config
 from llm.model import GPT
-from llm.utils import ModelLoader, unbox, DataclassUtils
+from llm.utils import ModelLoader, unbox, DataclassUtils, get_default_device
 
 DIR = Path(__file__).parent
 
@@ -36,8 +36,7 @@ class ModelConfig(FileConfig):
         super().__post_init__()
 
         if self.device is None:
-            # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
-            self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            self.device = get_default_device()
 
 
 @dataclass
@@ -89,8 +88,9 @@ class Sampler:
         checkpoint = None
         if config.init_from == 'resume':
             # init from a model saved in a specific directory
+            out_dir = DIR / 'results' / config.out_dir
             model_loader = ModelLoader(
-                out_dir=DIR / 'results' / config.out_dir,
+                out_dir=out_dir,
                 device=config.device,
                 checkpoint_name=config.checkpoint_name,
             )

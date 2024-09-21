@@ -1,0 +1,19 @@
+{
+  "init_from": "scratch",
+  "out_dir": "prince_xs",
+  "torch_compile": false,
+  "log_interval": 10,
+  "eval_interval": 100,
+  "eval_iters": 50,
+  "dataset": "prince",
+  "batch_size": 4,
+  "block_size": 8,
+  "n_layer": 1,
+  "n_head": 1,
+  "n_embd": 4,
+  "dropout": 0.2,
+  "learning_rate": 1e-3,
+  "max_iters": 5000,
+  "lr_decay_iters": 5000,
+  "min_lr": 1e-4
+}
