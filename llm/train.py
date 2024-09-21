@@ -62,6 +62,7 @@ class TrainingConfig(FileConfig):
     :param patience: how many unimproved evals to wait before early stopping
     """
     out_dir: Path = 'out'
+    training_data_path: str = None
     init_from: str = 'scratch'
     seed: int = 1337
     torch_compile: bool = True
@@ -104,6 +105,7 @@ class TrainingConfig(FileConfig):
 
         if self.device is None:
             self.device = get_default_device()
+        print(f'Using device {self.device}')
 
         if self.dtype is None:
             # 'float32', 'bfloat16', or 'float16', the latter will auto implement a GradScaler
@@ -142,6 +144,7 @@ class Trainer:
         self.seed_offset = 0
         self.ctx = nullcontext()
         self.model = None
+        self.data_dir = None
 
         self.ddp_world_size = 1
         self.ddp_local_rank = None
@@ -163,10 +166,6 @@ class Trainer:
     @property
     def device_type(self):
         return 'cuda' if self.is_cuda else 'cpu'
-
-    @property
-    def data_dir(self):
-        return DIR / 'data' / self.config.dataset
 
     def _setup_ddp(self):
         if self.ddp:
@@ -286,7 +285,7 @@ class Trainer:
             pt_dtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torch.float16}[config.dtype]
             self.ctx = torch.amp.autocast(device_type='cuda', dtype=pt_dtype)
 
-        load_data(name=config.dataset, train_ratio=config.train_ratio)
+        self.data_dir = load_data(name=config.dataset, train_ratio=config.train_ratio, data_path=config.training_data_path)
 
         # init these up here, can override if init_from='resume' (i.e. from a checkpoint)
         start_iter_num = 0

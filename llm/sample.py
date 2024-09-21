@@ -72,7 +72,7 @@ class Sampler:
     def __init__(self, **kwargs):
         self.config = config = ModelConfig(**kwargs)
 
-        print(f'using device {config.device}')
+        print(f'Using device {config.device}')
 
         # 'float32' or 'bfloat16' or 'float16'
         dtype = 'bfloat16' if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else 'float16'

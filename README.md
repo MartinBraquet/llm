@@ -144,12 +144,12 @@ pip install -e "."
 
 ```shell
 cd llm
-python data/prince/prepare.py
+python data/prince-medium/prepare.py
 python train.py config/train_prince.py
 torchrun --standalone --nproc_per_node=2 train.py config/train_gpt2_finetuned.json --init_from=resume
-python sample.py --out_dir=out-prince
-python sample.py --out_dir=out-prince --start="Then the little prince said"
-python sample.py --out_dir=out-prince --checkpoint_name=ckpt_init.pt
+python sample.py --out_dir=out-prince-medium
+python sample.py --out_dir=out-prince-medium --start="Then the little prince said"
+python sample.py --out_dir=out-prince-medium --checkpoint_name=ckpt_init.pt
 ```
 
 ## Tests

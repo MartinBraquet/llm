@@ -1,41 +1,69 @@
+import json
 import os
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 import requests
 import tiktoken
 
-from llm.cache.disk import get_disk
+from llm import BASE_DIR
 from llm.logger import logger
+from llm.utils import str_to_hash
 
 DIR = Path(__file__).parent
 
-DATA_URLS = {
-    'prince': 'https://ia601309.us.archive.org/2/items/TheLittlePrince-English/littleprince_djvu.txt',
-    'karamazov': 'https://www.gutenberg.org/cache/epub/28054/pg28054.txt',
-}
+DATA_DIR = BASE_DIR / 'data'
 
 
-def add_data_url(name: str, url: str):
-    DATA_URLS[name] = url
+@lru_cache
+def get_data_paths():
+    return json.load(open(DIR / 'data_paths.json'))
 
 
-def load_data(name: str, train_ratio: float = 0.97):
-    cache = get_disk()
-    base_key = f"input_ids_{name}"
-    train_ids, val_ids = cache.get(f"{base_key}_train"), cache.get(f"{base_key}_val")
-    logger.info(f"loading {name} with train_ratio={train_ratio}")
-    if train_ids is None or val_ids is None:
-        logger.info(f"downloading {name} data")
-        data_url = DATA_URLS[name]
-        data = requests.get(data_url).text
+def save_txt_file(data, name):
+    os.makedirs(DATA_DIR / name, exist_ok=True)
+    input_file_path = DATA_DIR / name / f'{name}.txt'
+    with open(input_file_path, 'w', encoding='utf-8') as f:
+        f.write(data)
 
-        data_dir = DIR / 'data' / name
-        os.makedirs(DIR / 'data', exist_ok=True)
-        os.makedirs(data_dir, exist_ok=True)
-        input_file_path = data_dir / f'{name}.txt'
-        with open(input_file_path, 'w', encoding='utf-8') as f:
-            f.write(data)
+
+def is_url(data_path):
+    return str(data_path).startswith('http')
+
+
+@lru_cache
+def get_key(data_path, train_ratio):
+    if is_url(data_path):
+        s = data_path
+    else:
+        with open(data_path, 'r') as f:
+            s = f.read()
+    return str_to_hash(s + str(float(train_ratio)))[:16]
+
+
+def load_data(
+    name: str = 'unnamed',
+    train_ratio: float = 0.9,
+    data_path: Path = None,
+    return_values: bool = False,
+):
+    logger.info(f"Loading {name} with train_ratio={train_ratio}")
+    if data_path is None:
+        data_path = get_data_paths()[name]
+    key = get_key(data_path, train_ratio=train_ratio)
+    data_dir = DATA_DIR / name / key
+    path_train, path_val = data_dir / 'train.bin', data_dir / 'val.bin'
+    cached = os.path.exists(path_train) and os.path.exists(path_val)
+    train_ids = val_ids = None
+    if not cached:
+        print(f"Downloading {name} data from {data_path}")
+        if is_url(data_path):
+            data = requests.get(data_path).text
+            save_txt_file(data=data, name=name)
+        else:
+            with open(data_path, 'r') as f:
+                data = f.read()
 
         n = len(data)
         last_train_index = int(n * train_ratio)
@@ -54,8 +82,17 @@ def load_data(name: str, train_ratio: float = 0.97):
         train_ids = np.array(train_ids, dtype=np.uint16)
         val_ids = np.array(val_ids, dtype=np.uint16)
 
-        train_ids.tofile(data_dir / 'train.bin')
-        val_ids.tofile(data_dir / 'val.bin')
-        # cache[f"{base_key}_train"], cache[f"{base_key}_val"] = train_ids, val_ids
+        os.makedirs(DATA_DIR / name, exist_ok=True)
+        os.makedirs(data_dir, exist_ok=True)
 
-    return train_ids, val_ids
+        train_ids.tofile(path_train)
+        val_ids.tofile(path_val)
+
+    elif return_values:
+        train_ids = np.memmap(path_train, dtype=np.uint16, mode='r')
+        val_ids = np.memmap(path_val, dtype=np.uint16, mode='r')
+
+    if return_values:
+        return train_ids, val_ids
+    else:
+        return data_dir

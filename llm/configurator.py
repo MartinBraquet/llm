@@ -1,16 +1,31 @@
 import json
+import os
 from ast import literal_eval
 from dataclasses import dataclass
+from pathlib import Path
 
+from llm import BASE_DIR
 from llm.utils import DataclassUtils
 
 
 @dataclass
 class FileConfig(DataclassUtils):
-    config_file: str = None
+    config_file: str | Path = None
 
     def __post_init__(self):
         if self.config_file is not None:
+            if not isinstance(self.config_file, Path):
+                self.config_file = Path(self.config_file)
+            paths = []
+            if not os.path.exists(self.config_file):
+                paths.append(str(self.config_file))
+                self.config_file = BASE_DIR / 'config' / self.config_file
+            if not os.path.exists(self.config_file):
+                paths.append(str(self.config_file))
+                raise ValueError(
+                    f"Config file does not exist in any of {', '.join(paths)}. "
+                    f"If you gave a relative path, make sure it is relative to the directory where this script is run."
+                )
             config = json.load(open(self.config_file))
             for k, v in config.items():
                 if not hasattr(self, k):
@@ -20,7 +35,7 @@ class FileConfig(DataclassUtils):
                 except (SyntaxError, ValueError):
                     pass
                 prev_v = getattr(self, k)
-                if type(v) != type(prev_v):
+                if type(v) != type(prev_v) and prev_v is not None:
                     print(f"WARNING: Key {k} has type {type(v)} but expected {type(prev_v)}")
                 print(f"Overriding: {k} = {v}")
                 setattr(self, k, v)

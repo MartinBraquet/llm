@@ -1,3 +1,4 @@
+import hashlib
 import os
 from dataclasses import dataclass
 from functools import lru_cache
@@ -123,5 +124,8 @@ class DataclassUtils:
 def get_default_device():
     # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    print(f'Using device {device}')
     return device
+
+
+def str_to_hash(s):
+    return hashlib.sha256(s.encode()).hexdigest()

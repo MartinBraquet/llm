@@ -1,6 +1,7 @@
 {
-  "out_dir": "gpt2_finetuned",
   "init_from": "resume",
+  "out_dir": "gpt2_finetuned",
+  "dataset": "prince",
   "eval_interval": 20,
   "eval_iters": 10,
   "log_interval": 2,
@@ -9,7 +10,6 @@
   "wandb_log": false,
   "wandb_project": "gpt2_finetuned",
   "wandb_run_name": "mini-gpt",
-  "dataset": "prince",
   "gradient_accumulation_steps": 8,
   "batch_size": 4,
   "dropout": 0.2,
