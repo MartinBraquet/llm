@@ -7,6 +7,14 @@
 Some experiments with large language models from scratch (i.e., without using any external resources such as the OpenAI
 API).
 
+* [Demo](#demo)
+* [Conclusion](#conclusion)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Feedback](#feedback)
+* [Contributions](#contributions)
+
+
 ## Demo
 
 ### Learning a book from scratch
@@ -150,7 +158,7 @@ cd llm
 
 ### Environment
 
-If not already done, create a virtual environment using your favorite package manager. For instance using conda:
+If not already done, create a virtual environment using your favorite environment manager. For instance using conda:
 
 ```shell
 conda create -n llm python=3.11
