@@ -8,11 +8,9 @@ from pathlib import Path
 
 import numpy as np
 import torch
-import wandb
 from torch.distributed import init_process_group, destroy_process_group
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-from llm.cache.disk import get_disk
 from llm.configurator import FileConfig
 from llm.loader import load_data
 from llm.model import GPTConfig, GPT
@@ -396,6 +394,7 @@ class Trainer:
 
             # logging
             if config.wandb_log and self.master_process:
+                import wandb
                 wandb.init(project=config.wandb_project, name=config.wandb_run_name, config=config.dict())
 
             # training loop
@@ -415,6 +414,7 @@ class Trainer:
                     losses = self.estimate_loss()
                     print(f"step {iter_num}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
                     if config.wandb_log:
+                        import wandb
                         wandb.log({
                             "iter": iter_num,
                             "train/loss": losses['train'],
