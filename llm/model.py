@@ -359,6 +359,7 @@ class GPT(nn.Module):
             # sample from the distribution
             print('probs', probs)
             print(probs.sum())
+            # Seeded torch.multinomial is platform-dependent, so we can't use it for reproducibility in unit testing
             # idx_next = torch.multinomial(probs, num_samples=1)
             idx_next = torch.from_numpy(np.where(np.random.multinomial(1, probs[0], size=1)[0] == 1)[0][np.newaxis, :])
             print('idx_next', idx_next)
