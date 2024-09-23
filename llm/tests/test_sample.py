@@ -6,6 +6,7 @@ from llm.sample import generate_text, Sampler
 
 DIR = Path(__file__).parent
 
+
 class TestSample(TestCase):
 
     def test_sample(self):
@@ -17,3 +18,8 @@ class TestSample(TestCase):
         config_file = DIR / 'config.json'
         text = generate_text(config_file=config_file)
         self.assertEqual('\n41hF-rgwmv-vxL.scT\nu', text)
+
+    def test_sample_from_online(self):
+        sampler = Sampler(init_from='online', out_dir='gpt2')
+        text = sampler.generate_text(prompt='The sun', max_new_tokens=10)
+        self.assertEqual('The sun has been shining for weeks, but it has set', text)

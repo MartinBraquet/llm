@@ -8,7 +8,6 @@ Some experiments with large language models from scratch (i.e., without using an
 API).
 
 * [Demo](#demo)
-* [Conclusion](#conclusion)
 * [Installation](#installation)
 * [Usage](#usage)
 * [Feedback](#feedback)
@@ -228,8 +227,7 @@ from llm.sample import Sampler
 
 sampler = Sampler(
     out_dir='kafka',  # output directory where the model has been saved
-    seed=None,
-    # set the seed to any integer to remove randomness (i.e., always produce the same output for the same input)
+    seed=None,  # set the seed to any integer to remove randomness (i.e., always produce the same output for the same input)
 )
 generated_text = sampler.generate_text(
     prompt='My name is Martin and I am',  # prompt
@@ -238,7 +236,7 @@ generated_text = sampler.generate_text(
 print(generated_text)
 ```
 
-To access to all the parameters for text generation, see the doc:
+To access all the parameters for text generation, see the doc:
 
 ```python
 from llm.sample import Sampler

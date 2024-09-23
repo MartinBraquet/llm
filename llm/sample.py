@@ -107,7 +107,7 @@ class Sampler:
             assert config.out_dir.startswith('gpt2'), 'out_dir must start with gpt2'
             self.model = GPT.from_pretrained(config.out_dir, dict(dropout=0.0))
         else:
-            raise ValueError(f"Unknown init_from {config.init_from}, must be 'resume' or one type of 'gpt2'")
+            raise ValueError(f"Unknown init_from {config.init_from}, must be 'resume' or 'online'")
 
         self.model.eval()
         self.model.to(config.device)
