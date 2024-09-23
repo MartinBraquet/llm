@@ -1,5 +1,3 @@
-from transformers import TrainerControl
-
 # Large Language Models
 
 [![CI](https://github.com/MartinBraquet/llm/actions/workflows/ci.yml/badge.svg)](https://github.com/MartinBraquet/llm/actions/workflows/ci.yml)
@@ -63,6 +61,8 @@ me. But you cannot pluck the stars from heaven...”
 This model is, however, very small and hence very fast to train. This makes it convenient for applications where
 one would like to complete snippets from a book.
 
+To reproduce the results, visit the [TODO]() notebook.
+
 ### Learning a book by fine-tuning a pretrained model
 
 Another use-case is to learn a book by fine-tuning a pretrained model.
@@ -125,6 +125,8 @@ boys have been told to do. And that is a great thing! Because of you, I have bee
 </blockquote>
 
 The wisdom behind those words, which, for the most part, are not in the book, is quite appreciable.
+
+To reproduce the results, visit the [TODO]() notebook.
 
 ### Conclusion
 
