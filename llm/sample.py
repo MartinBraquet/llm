@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
+import numpy as np
 import tiktoken
 import torch
 
@@ -80,6 +81,7 @@ class Sampler:
         # 'float32' or 'bfloat16' or 'float16'
         dtype = 'bfloat16' if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else 'float16'
 
+        np.random.seed(config.seed)
         torch.manual_seed(config.seed)
         torch.cuda.manual_seed(config.seed)
         torch.backends.cuda.matmul.allow_tf32 = True  # allow tf32 on matmul
