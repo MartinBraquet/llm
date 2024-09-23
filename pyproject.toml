@@ -9,7 +9,7 @@ packages = ["llm"]
 
 [project]
 name = "llm"
-version = "0.1.0"
+version = "0.1.1"
 description = "Large Language Model"
 readme = "README.md"
 requires-python = ">=3.10"
