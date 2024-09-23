@@ -191,21 +191,23 @@ from llm.train import Trainer
 
 trainer = Trainer(
     out_dir='kafka',  # output directory where the model will be saved
-    dataset='https://www.gutenberg.org/cache/epub/5200/pg5200.txt',  # dataset URL or local path
+    dataset='kafka',  # dataset name
+    training_data_path='https://www.gutenberg.org/cache/epub/5200/pg5200.txt',  # dataset URL or local path
     eval_interval=10,  # when to evaluate the model
     batch_size=4,  # batch size
-    block_size=8,  # block size (aka context length)
-    n_layer=1,  # number of layers
-    n_head=1,  # number of attention heads per layer
-    n_embd=4,  # embedding dimension
+    block_size=16,  # block size (aka context length)
+    n_layer=2,  # number of layers
+    n_head=4,  # number of attention heads per layer
+    n_embd=32,  # embedding dimension
     dropout=0.2,  # dropout rate
-    learning_rate=0.01,  # learning rate
+    learning_rate=0.05,  # learning rate
+    min_lr=0.005,  # minimum learning rate
     beta2=0.99,  # adam beta2 (should be reduced for larger models / datasets)
 )
 trainer.run()
 ```
 
-It should take a few minutes to train on a CPU, and it is much faster on a GPU.
+It should take a few minutes to train on a typical CPU (8-16 cores), and it is much faster on a GPU.
 
 Note that there are many more parameters to tweak, if desired. See all of them in the doc:
 

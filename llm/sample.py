@@ -49,13 +49,13 @@ class TextConfig(DataclassUtils):
     :param prompt: prompt to start generation.
       Can be "<|endoftext|>" or etc. Can also specify a file, use as: "FILE:prompt.txt"
     :param num_samples: number of samples to draw
-    :param max_new_tokens: number of tokens generated in each sample
+    :param max_tokens: number of tokens generated in each sample
     :param temperature: 1.0 = no change, < 1.0 = less random, > 1.0 = more random, in predictions
     :param top_k: retain only the top_k most likely tokens, clamp others to have 0 probability
     """
     prompt: str = "\n"
     num_samples: int = 1
-    max_new_tokens: int = 100
+    max_tokens: int = 100
     temperature: float = 1.0
     top_k: int = 200
 
@@ -155,7 +155,7 @@ class Sampler:
             for k in range(config.num_samples):
                 y = self.model.generate(
                     idx=x,
-                    max_new_tokens=config.max_new_tokens,
+                    max_tokens=config.max_tokens,
                     temperature=config.temperature,
                     top_k=config.top_k
                 )

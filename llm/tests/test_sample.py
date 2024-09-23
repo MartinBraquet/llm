@@ -11,7 +11,7 @@ class TestSample(TestCase):
 
     def test_sample(self):
         sampler = Sampler(out_dir=BASE_DIR / 'results' / 'test')
-        text = sampler.generate_text(prompt='Love is the answer to', max_new_tokens=20)
+        text = sampler.generate_text(prompt='Love is the answer to', max_tokens=20)
         self.assertEqual('Love is the answer to41b1F-.tTwmv-vxL.scT', text)
 
     def test_sample_from_file(self):
@@ -21,5 +21,5 @@ class TestSample(TestCase):
 
     def test_sample_from_online(self):
         sampler = Sampler(init_from='online', out_dir='gpt2')
-        text = sampler.generate_text(prompt='The sun', max_new_tokens=10)
+        text = sampler.generate_text(prompt='The sun', max_tokens=10)
         self.assertEqual('The sun has been shining for weeks, but it has set', text)

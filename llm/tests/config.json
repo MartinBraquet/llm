@@ -1,4 +1,4 @@
 {
   "out_dir": "test",
-  "max_new_tokens": 20
+  "max_tokens": 20
 }
