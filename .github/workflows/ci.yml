@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: pip install .
       - name: Run tests
-        run: pytest src --cov=llm --cov-report=xml
+        run: pytest llm --cov=llm --cov-report=xml
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         uses: codecov/codecov-action@v4.0.1
