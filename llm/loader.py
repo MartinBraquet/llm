@@ -1,5 +1,6 @@
 import json
 import os
+import pickle
 from functools import lru_cache
 from pathlib import Path
 
@@ -9,7 +10,7 @@ import tiktoken
 
 from llm import BASE_DIR
 from llm.logger import logger
-from llm.utils import str_to_hash
+from llm.utils import str_to_hash, list_to_hash
 
 DIR = Path(__file__).parent
 
@@ -33,25 +34,37 @@ def is_url(data_path):
 
 
 @lru_cache
-def get_key(data_path, train_ratio):
+def get_key(
+    data_path,
+    train_ratio,
+    encoding,
+):
     if is_url(data_path):
         s = data_path
     else:
         with open(data_path, 'r') as f:
             s = f.read()
-    return str_to_hash(s + str(float(train_ratio)))[:16]
+    return list_to_hash([s, str(float(train_ratio)), encoding])[:16]
 
 
 def load_data(
     name: str = 'unnamed',
     train_ratio: float = 0.9,
-    data_path: Path = None,
+    data_path: Path | str = None,
     return_values: bool = False,
+    encoding: str = 'gpt2',
+    out_dir: Path | str = None,
 ):
     logger.info(f"Loading {name} with train_ratio={train_ratio}")
+    if isinstance(out_dir, str):
+        out_dir = Path(out_dir)
     if data_path is None:
         data_path = get_data_paths()[name]
-    key = get_key(data_path, train_ratio=train_ratio)
+    key = get_key(
+        data_path,
+        train_ratio=train_ratio,
+        encoding=encoding,
+    )
     data_dir = DATA_DIR / name / key
     path_train, path_val = data_dir / 'train.bin', data_dir / 'val.bin'
     cached = os.path.exists(path_train) and os.path.exists(path_val)
@@ -70,11 +83,25 @@ def load_data(
         train_data = data[:last_train_index]
         val_data = data[last_train_index:]
 
-        # encode with tiktoken gpt2 bpe
-        enc = tiktoken.get_encoding("gpt2")
+        if encoding == 'gpt2':
+            enc = tiktoken.get_encoding("gpt2")
+            encode = enc.encode_ordinary
+        elif encoding == 'char':
+            chars = sorted(list(set(data)))
+            vocab_size = len(chars)
+            print("all the unique characters:", ''.join(chars))
+            print(f"vocab size: {vocab_size:,}")
+            stoi = {ch: i for i, ch in enumerate(chars)}
+            itos = {i: ch for i, ch in enumerate(chars)}
+            assert out_dir is not None, "out_dir is required for char encoding"
+            with open(out_dir / 'meta.pkl', 'wb') as f:
+                pickle.dump({'stoi': stoi, 'itos': itos}, f)
+            encode = lambda s: [stoi[c] for c in s]
+        else:
+            raise ValueError(f"Unknown encoding {encoding}, use 'gpt2' or 'char'")
 
-        train_ids = enc.encode_ordinary(train_data)
-        val_ids = enc.encode_ordinary(val_data)
+        train_ids = encode(train_data)
+        val_ids = encode(val_data)
 
         print(f"train has {len(train_ids):,} tokens")
         print(f"val has {len(val_ids):,} tokens")

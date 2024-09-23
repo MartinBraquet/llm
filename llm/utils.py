@@ -129,3 +129,7 @@ def get_default_device():
 
 def str_to_hash(s):
     return hashlib.sha256(s.encode()).hexdigest()
+
+
+def list_to_hash(items):
+    return str_to_hash('::'.join(items))

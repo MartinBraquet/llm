@@ -1,5 +1,6 @@
 import math
 import os
+import pickle
 import time
 from contextlib import nullcontext, contextmanager
 from dataclasses import dataclass
@@ -78,6 +79,7 @@ class TrainingConfig(FileConfig):
     wandb_log: bool = False
     wandb_project: str = 'owt'
     wandb_run_name: str = 'gpt2'
+    encoding: str = 'gpt2'
     dataset: str = 'openwebtext'
     gradient_accumulation_steps: int = 5 * 8
     batch_size: int = 12
@@ -285,20 +287,29 @@ class Trainer:
             pt_dtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torch.float16}[config.dtype]
             self.ctx = torch.amp.autocast(device_type='cuda', dtype=pt_dtype)
 
-        self.data_dir = load_data(name=config.dataset, train_ratio=config.train_ratio, data_path=config.training_data_path)
+        self.data_dir = load_data(
+            name=config.dataset,
+            train_ratio=config.train_ratio,
+            data_path=config.training_data_path,
+            encoding=config.encoding,
+            out_dir=config.out_dir,
+        )
 
         # init these up here, can override if init_from='resume' (i.e. from a checkpoint)
         start_iter_num = 0
         best_val_loss = 1e9
 
         # attempt to derive vocab_size from the dataset
-        cache = get_disk()
-        meta_key = f'meta_{config.dataset}'
         meta_vocab_size = None
-        meta = cache.get(meta_key)
-        if meta:
-            meta_vocab_size = meta['vocab_size']
-            print(f"found vocab_size = {meta_vocab_size}")
+        meta_path = config.out_dir / 'meta.pkl'
+        if os.path.exists(meta_path):
+            with open(meta_path, 'rb') as f:
+                meta = pickle.load(f)
+            stoi, itos = meta.get('stoi'), meta.get('itos')
+            if stoi is not None and itos is not None:
+                assert len(stoi) == len(itos), f"{len(stoi)} != {len(itos)}"
+                meta_vocab_size = len(stoi)
+                print(f"found vocab_size = {meta_vocab_size}")
 
         # When to save the init model (cannot save it just after initialization)
         iter_save_init_ckpt = 0 if config.init_from.startswith('gpt2') else min(config.eval_interval, 10)
@@ -311,16 +322,18 @@ class Trainer:
             n_embd=config.n_embd,
             block_size=config.block_size,
             bias=config.bias,
-            vocab_size=None,
+            vocab_size=0,
             dropout=config.dropout,
         )  # start with model_args from command line
         if config.init_from == 'scratch':
             # init a new model from scratch
             print("Initializing a new model from scratch")
             # determine the vocab size we'll use for from-scratch training
-            if meta_vocab_size is None:
+            if meta_vocab_size is not None:
+                model_args['vocab_size'] = meta_vocab_size
+            else:
                 print("defaulting to vocab_size of GPT-2 to 50304 (50257 rounded up for efficiency)")
-            model_args['vocab_size'] = meta_vocab_size if meta_vocab_size is not None else 50304
+                model_args['vocab_size'] = 50304
             gpt_conf = GPTConfig(**model_args)
             self.model = GPT(gpt_conf)
         elif config.init_from == 'resume':

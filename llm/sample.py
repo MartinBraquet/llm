@@ -107,28 +107,33 @@ class Sampler:
         if config.torch_compile:
             self.model = torch.compile(self.model)  # requires PyTorch 2.0 (optional)
 
-        # look for the meta pickle in case it is available in the dataset folder
-        meta_path = False
-        if config.init_from == 'resume' and 'config' in checkpoint:
-            _ckpt_config = checkpoint['config']
-            if 'dataset' in _ckpt_config:  # older results might not have these...
-                dataset = _ckpt_config['dataset']
-                if os.path.exists(_ := DIR / 'data' / dataset / 'meta.pkl'):
-                    meta_path = _
+        self._setup_encoding(ckpt_config=checkpoint.get('config'))
 
-        if meta_path:
-            print(f"Loading meta from {meta_path}...")
-            with open(meta_path, 'rb') as f:
-                meta = pickle.load(f)
-            stoi, itos = meta['stoi'], meta['itos']
-            self.encode = lambda s: [stoi[c] for c in s]
-            self.decode = lambda l: ''.join([itos[i] for i in l])
-        else:
-            # assume gpt-2 encodings by default
-            print("No meta.pkl found, assuming GPT-2 encodings")
+    def _setup_encoding(self, ckpt_config):
+        encoding = None
+        if self.config.init_from == 'resume' and ckpt_config is not None:
+            encoding = ckpt_config.get('encoding')
+            if out_dir := ckpt_config.get('out_dir'):
+                meta_path = out_dir / 'meta.pkl'
+                if os.path.exists(meta_path):
+                    with open(meta_path, 'rb') as f:
+                        meta = pickle.load(f)
+                stoi, itos = meta.get('stoi'), meta.get('itos')
+                if stoi is not None or itos is not None:
+                    print(f"Loading encoding from {meta_path}...")
+                    self.encode = lambda s: [stoi[c] for c in s]
+                    self.decode = lambda l: ''.join([itos[i] for i in l])
+                    return
+
+        if encoding in (None, 'gpt2'):
+            if encoding is None:
+                print("No meta.pkl found, assuming GPT-2 encodings")
             enc = tiktoken.get_encoding("gpt2")
             self.encode = partial(enc.encode, allowed_special={"<|endoftext|>"})
             self.decode = enc.decode
+            return
+
+        raise ValueError(f"Unknown encoding {encoding}")
 
     def generate_text(self, **kwargs):
         config = TextConfig(**kwargs)

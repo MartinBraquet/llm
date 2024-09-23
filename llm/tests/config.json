@@ -1,4 +1,4 @@
 {
-  "out_dir": "prince_xs",
-  "max_new_tokens": 10
+  "out_dir": "test",
+  "max_new_tokens": 20
 }
