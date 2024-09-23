@@ -31,7 +31,7 @@ def get_last_checkpoint(out_dir):
 class ModelLoader:
     def __init__(
         self,
-        out_dir: Path,
+        out_dir: Path | str,
         checkpoint_name: str = 'last',
         device: str = 'cuda',
         dropout: Optional[float] = None
@@ -133,3 +133,9 @@ def str_to_hash(s):
 
 def list_to_hash(items):
     return str_to_hash('::'.join(items))
+
+
+def to_path(s):
+    if isinstance(s, str):
+        return Path(s)
+    return s

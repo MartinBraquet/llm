@@ -8,9 +8,10 @@ from pathlib import Path
 import tiktoken
 import torch
 
+from llm import BASE_DIR
 from llm.configurator import FileConfig, get_relevant_config
 from llm.model import GPT
-from llm.utils import ModelLoader, unbox, DataclassUtils, get_default_device
+from llm.utils import ModelLoader, unbox, DataclassUtils, get_default_device, to_path
 
 DIR = Path(__file__).parent
 
@@ -25,7 +26,7 @@ class ModelConfig(FileConfig):
     :param torch_compile: use PyTorch 2.0 to compile the model to be faster
     :param device: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
     """
-    out_dir: Path = ''
+    out_dir: Path | str = ''
     checkpoint_name: str = 'last'
     init_from: str = 'resume'
     seed: int = 1337
@@ -34,6 +35,8 @@ class ModelConfig(FileConfig):
 
     def __post_init__(self):
         super().__post_init__()
+
+        self.out_dir = to_path(self.out_dir)
 
         if self.device is None:
             self.device = get_default_device()
@@ -113,11 +116,12 @@ class Sampler:
         encoding = None
         if self.config.init_from == 'resume' and ckpt_config is not None:
             encoding = ckpt_config.get('encoding')
-            if out_dir := ckpt_config.get('out_dir'):
-                meta_path = out_dir / 'meta.pkl'
-                if os.path.exists(meta_path):
-                    with open(meta_path, 'rb') as f:
-                        meta = pickle.load(f)
+            out_dir = to_path(ckpt_config.get('out_dir'))
+            if isinstance(out_dir, Path) and not out_dir.is_absolute():
+                out_dir = BASE_DIR / 'results' / out_dir
+            if out_dir and os.path.exists(meta_path := out_dir / 'meta.pkl'):
+                with open(meta_path, 'rb') as f:
+                    meta = pickle.load(f)
                 stoi, itos = meta.get('stoi'), meta.get('itos')
                 if stoi is not None or itos is not None:
                     print(f"Loading encoding from {meta_path}...")

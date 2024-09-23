@@ -8,9 +8,9 @@ from llm.sample import generate_text, Sampler
 
 DIR = Path(__file__).parent
 
-class TestSample(TestCase):
+class TestLoader(TestCase):
 
-    def test_sample(self):
+    def test_loader(self):
         train_ids, eval_ids = load_data(
             train_ratio=0.8,
             data_path=DIR / 'training_data.txt',
