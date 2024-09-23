@@ -22,7 +22,7 @@ class ModelConfig(FileConfig):
     """
     :param out_dir: output directory, ignored if init_from is not 'resume'
     :param checkpoint_name: name of the checkpoint to load, ignored if init_from is not 'resume'
-    :param init_from: either 'resume' (from an out_dir) or a gpt2 variant (e.g. 'gpt2-xl')
+    :param init_from: either 'resume' (from a local out_dir) or 'online' (from HuggingFace hub)
     :param seed: random seed
     :param torch_compile: use PyTorch 2.0 to compile the model to be faster
     :param device: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
@@ -37,7 +37,7 @@ class ModelConfig(FileConfig):
     def __post_init__(self):
         super().__post_init__()
 
-        self.out_dir = to_path(self.out_dir)
+        # self.out_dir = to_path(self.out_dir)
 
         if self.device is None:
             self.device = get_default_device()
@@ -46,23 +46,23 @@ class ModelConfig(FileConfig):
 @dataclass
 class TextConfig(DataclassUtils):
     """
-    :param start: prompt to start generation.
+    :param prompt: prompt to start generation.
       Can be "<|endoftext|>" or etc. Can also specify a file, use as: "FILE:prompt.txt"
     :param num_samples: number of samples to draw
     :param max_new_tokens: number of tokens generated in each sample
     :param temperature: 1.0 = no change, < 1.0 = less random, > 1.0 = more random, in predictions
     :param top_k: retain only the top_k most likely tokens, clamp others to have 0 probability
     """
-    start: str = "\n"
+    prompt: str = "\n"
     num_samples: int = 1
     max_new_tokens: int = 100
     temperature: float = 1.0
     top_k: int = 200
 
     def __post_init__(self):
-        if self.start.startswith('FILE:'):
-            with open(self.start[5:], 'r', encoding='utf-8') as f:
-                self.start = f.read()
+        if self.prompt.startswith('FILE:'):
+            with open(self.prompt[5:], 'r', encoding='utf-8') as f:
+                self.prompt = f.read()
 
 
 @dataclass
@@ -81,9 +81,10 @@ class Sampler:
         # 'float32' or 'bfloat16' or 'float16'
         dtype = 'bfloat16' if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else 'float16'
 
-        np.random.seed(config.seed)
-        torch.manual_seed(config.seed)
-        torch.cuda.manual_seed(config.seed)
+        if config.seed is not None:
+            np.random.seed(config.seed)
+            torch.manual_seed(config.seed)
+            torch.cuda.manual_seed(config.seed)
         torch.backends.cuda.matmul.allow_tf32 = True  # allow tf32 on matmul
         torch.backends.cudnn.allow_tf32 = True  # allow tf32 on cudnn
         device_type = 'cuda' if 'cuda' in config.device else 'cpu'  # for later use in torch.autocast
@@ -101,9 +102,10 @@ class Sampler:
             )
             self.model = model_loader.load()
             checkpoint = model_loader.checkpoint
-        elif config.init_from.startswith('gpt2'):
+        elif config.init_from == 'online':
             # init from a given GPT-2 model
-            self.model = GPT.from_pretrained(config.init_from, dict(dropout=0.0))
+            assert config.out_dir.startswith('gpt2'), 'out_dir must start with gpt2'
+            self.model = GPT.from_pretrained(config.out_dir, dict(dropout=0.0))
         else:
             raise ValueError(f"Unknown init_from {config.init_from}, must be 'resume' or one type of 'gpt2'")
 
@@ -112,7 +114,7 @@ class Sampler:
         if config.torch_compile:
             self.model: GPT = torch.compile(self.model)  # requires PyTorch 2.0 (optional)
 
-        self._setup_encoding(ckpt_config=checkpoint.get('config'))
+        self._setup_encoding(ckpt_config=checkpoint.get('config') if checkpoint else None)
 
     def _setup_encoding(self, ckpt_config):
         encoding = None
@@ -145,9 +147,7 @@ class Sampler:
 
     def generate_text(self, **kwargs):
         config = TextConfig(**kwargs)
-        start_ids = self.encode(config.start)
-        print('start_ids', start_ids)
-        print(self.device)
+        start_ids = self.encode(config.prompt)
         x = (torch.tensor(start_ids, dtype=torch.long, device=self.device)[None, ...])
 
         result = []
@@ -166,6 +166,14 @@ class Sampler:
     @property
     def device(self):
         return self.config.device
+
+    @classmethod
+    def help_model_config(cls):
+        help(ModelConfig)
+
+    @classmethod
+    def help_text_config(cls):
+        help(TextConfig)
 
 
 def generate_text(**kwargs):

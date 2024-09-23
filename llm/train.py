@@ -68,7 +68,7 @@ class TrainingConfig(FileConfig):
     device: str = None
     dtype: str = None
     train_ratio: float = 0.9
-    log_interval: int = 1
+    log_interval: int = 10
     eval_interval: int = 100
     eval_iters: int = 20
     eval_only: bool = False
@@ -146,10 +146,14 @@ class Trainer:
         self.model = None
         self.data_dir = None
 
+        # is this a distributed data parallel run (multiple GPU nodes)?
+        self.ddp = int(os.environ.get('RANK', -1)) != -1
         self.ddp_world_size = 1
         self.ddp_local_rank = None
-        self.ddp = int(
-            os.environ.get('RANK', -1)) != -1  # is this a distributed data parallel run (multiple GPU nodes)?
+
+    @classmethod
+    def help_config(cls):
+        help(TrainingConfig)
 
     @property
     def device(self):
