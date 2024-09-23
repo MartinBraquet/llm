@@ -1,7 +1,7 @@
 # Large Language Models
 
-[![CI](https://github.com/MartinBraquet/llm/actions/workflows/ci.yml/badge.svg)](https://github.com/MartinBraquet/llm/actions/workflows/ci.yml/badge.svg)
-[![CD](https://github.com/MartinBraquet/llm/actions/workflows/cd.yml/badge.svg)](https://github.com/MartinBraquet/llm/actions/workflows/cd.yml/badge.svg)
+[![CI](https://github.com/MartinBraquet/llm/actions/workflows/ci.yml/badge.svg)](https://github.com/MartinBraquet/llm/actions/workflows/ci.yml)
+[![CD](https://github.com/MartinBraquet/llm/actions/workflows/cd.yml/badge.svg)](https://github.com/MartinBraquet/llm/actions/workflows/cd.yml)
 [![Coverage](https://codecov.io/gh/MartinBraquet/llm/branch/main/graph/badge.svg)](https://codecov.io/gh/MartinBraquet/llm)
 
 Some experiments with large language models from scratch (i.e., without using any external resources such as the OpenAI API).
