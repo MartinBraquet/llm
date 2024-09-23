@@ -1,5 +1,9 @@
 # Large Language Models
 
+[![CI](https://github.com/MartinBraquet/llm/actions/workflows/ci.yml/badge.svg)](https://github.com/MartinBraquet/llm/actions/workflows/ci.yml/badge.svg)
+[![CD](https://github.com/MartinBraquet/llm/actions/workflows/cd.yml/badge.svg)](https://github.com/MartinBraquet/llm/actions/workflows/cd.yml/badge.svg)
+[![Coverage](https://codecov.io/gh/MartinBraquet/llm/branch/main/graph/badge.svg)](https://codecov.io/gh/MartinBraquet/llm)
+
 Some experiments with large language models from scratch (i.e., without using any external resources such as the OpenAI API).
 
 ## Demo
@@ -157,6 +161,19 @@ python sample.py --out_dir=out-prince-medium --checkpoint_name=ckpt_init.pt
 ```shell
 pytest
 ```
+
+## Feedback
+
+For any issue / bug report / feature request,
+open an [issue](https://github.com/MartinBraquet/llm/issues).
+
+## Contributions
+
+To provide upgrades or fixes, open a [pull request](https://github.com/MartinBraquet/llm/pulls).
+
+### Contributors
+
+[![Contributors](https://contrib.rocks/image?repo=MartinBraquet/llm)](https://github.com/MartinBraquet/llm/graphs/contributors)
 
 ## Developer Notes
 
