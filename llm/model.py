@@ -34,6 +34,7 @@ import inspect
 from dataclasses import dataclass
 from functools import lru_cache
 
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
@@ -358,8 +359,8 @@ class GPT(nn.Module):
             # sample from the distribution
             print('probs', probs)
             print(probs.sum())
-            idx_next = torch.multinomial(probs, num_samples=1)
-            # idx_next = torch.from_numpy(np.where(np.random.multinomial(1, probs[0], size=1)[0] == 1)[0][np.newaxis, :])
+            # idx_next = torch.multinomial(probs, num_samples=1)
+            idx_next = torch.from_numpy(np.where(np.random.multinomial(1, probs[0], size=1)[0] == 1)[0][np.newaxis, :])
             print('idx_next', idx_next)
             # append sampled index to the running sequence and continue
             idx = torch.cat((idx, idx_next), dim=1)
