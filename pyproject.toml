@@ -25,4 +25,6 @@ dependencies = [
     "notebook",
     "ipywidgets",
     "pytest",
+    "pytest-cov",
+    "pytest-env",
 ]
