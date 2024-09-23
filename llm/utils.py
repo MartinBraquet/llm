@@ -61,7 +61,7 @@ class ModelLoader:
     def checkpoint(self):
         return self._checkpoint
 
-    def load(self):
+    def load(self) -> GPT:
         if self._model is None:
             self._checkpoint = torch.load(
                 self.ckpt_path,

@@ -108,7 +108,7 @@ class Sampler:
         self.model.eval()
         self.model.to(config.device)
         if config.torch_compile:
-            self.model = torch.compile(self.model)  # requires PyTorch 2.0 (optional)
+            self.model: GPT = torch.compile(self.model)  # requires PyTorch 2.0 (optional)
 
         self._setup_encoding(ckpt_config=checkpoint.get('config'))
 
