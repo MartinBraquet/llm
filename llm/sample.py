@@ -125,6 +125,8 @@ class Sampler:
                 stoi, itos = meta.get('stoi'), meta.get('itos')
                 if stoi is not None or itos is not None:
                     print(f"Loading encoding from {meta_path}...")
+                    print(f"stoi: {stoi}")
+                    print(f"itos: {itos}")
                     self.encode = lambda s: [stoi[c] for c in s]
                     self.decode = lambda l: ''.join([itos[i] for i in l])
                     return
@@ -142,6 +144,8 @@ class Sampler:
     def generate_text(self, **kwargs):
         config = TextConfig(**kwargs)
         start_ids = self.encode(config.start)
+        print('start_ids', start_ids)
+        print(self.device)
         x = (torch.tensor(start_ids, dtype=torch.long, device=self.device)[None, ...])
 
         result = []
