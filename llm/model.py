@@ -357,15 +357,11 @@ class GPT(nn.Module):
             # apply softmax to convert logits to (normalized) probabilities
             probs = F.softmax(logits, dim=-1)
             # sample from the distribution
-            probs = np.array(probs[0]).astype(np.float64)
-            probs /= probs.sum()
-            # print('probs', probs)
-            # print(probs.sum().item())
+            # probs = np.array(probs[0]).astype(np.float64)
+            # probs /= probs.sum()
+            # idx_next = torch.asarray([[np.argmax(np.random.multinomial(1, probs, size=1)[0])]])
             # Seeded torch.multinomial is platform-dependent, so we can't use it for reproducibility in unit testing
-            # idx_next = torch.multinomial(probs, num_samples=1)
-            idx_next = np.argmax(np.random.multinomial(1, probs, size=1)[0])
-            idx_next = torch.asarray([[idx_next]])
-            # print('idx_next', idx_next)
+            idx_next = torch.multinomial(probs, num_samples=1)
             # append sampled index to the running sequence and continue
             idx = torch.cat((idx, idx_next), dim=1)
 

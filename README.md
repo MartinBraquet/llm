@@ -13,7 +13,6 @@ API).
 * [Feedback](#feedback)
 * [Contributions](#contributions)
 
-
 ## Demo
 
 ### Learning a book from scratch
@@ -68,7 +67,7 @@ me. But you cannot pluck the stars from heaven...”
 This model is, however, very small and hence very fast to train. This makes it convenient for applications where
 one would like to complete snippets from a book.
 
-To reproduce the results, visit the [TODO]() notebook.
+To reproduce the results, visit the [from_scratch.ipynb](demo/from_scratch.ipynb) notebook.
 
 ### Learning a book by fine-tuning a pretrained model
 
@@ -89,10 +88,10 @@ and we slightly update those weights by training the model on the text in the bo
 
 We compare the results before and after fine-tuning a GPT2 model on The Little Prince:
 
-| Input             | _The essential is invisible to_                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Before finetuning | _The essential is invisible to the common man, but that which is essential to us so is called in the proper name. And, therefore, the power or work of generation is an essential to the nature of an orderly creature, for it serves for the preservation of the natural order of the generation.<br/> Secondly, God by the very power which is ordained to man, produces a true and sensible image of himself, as has been observed._                         |
-| After finetuning  | _The essential is invisible to the eye; the indispensable is invisible to the mind. It is what makes one day different from other days, one hour from other hours. It is what makes one day a good day, and one hour a bad day.<br/> So then I chose a flower that was unique in the world. I chose the rose that belonged to me. And it is she that I shall put under the glass globe. To protect her, I shall place her under the shelter of my glass globe._ |
+| Input              | _The essential is invisible to_                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Before fine-tuning | _The essential is invisible to the common man, but that which is essential to us so is called in the proper name. And, therefore, the power or work of generation is an essential to the nature of an orderly creature, for it serves for the preservation of the natural order of the generation.<br/> Secondly, God by the very power which is ordained to man, produces a true and sensible image of himself, as has been observed._                         |
+| After fine-tuning  | _The essential is invisible to the eye; the indispensable is invisible to the mind. It is what makes one day different from other days, one hour from other hours. It is what makes one day a good day, and one hour a bad day.<br/> So then I chose a flower that was unique in the world. I chose the rose that belonged to me. And it is she that I shall put under the glass globe. To protect her, I shall place her under the shelter of my glass globe._ |
 
 We notice a clear change of style and ideas, although the model sometimes fails to reflect the ideology of the book (as
 attested in "the indispensable is invisible to the mind").
@@ -133,7 +132,7 @@ boys have been told to do. And that is a great thing! Because of you, I have bee
 
 The wisdom behind those words, which, for the most part, are not in the book, is quite appreciable.
 
-To reproduce the results, visit the [TODO]() notebook.
+To reproduce the results, visit the [finetuning.ipynb](demo/finetuning.ipynb) notebook.
 
 ### Conclusion
 
@@ -229,7 +228,7 @@ from llm.sample import Sampler
 
 sampler = Sampler(
     out_dir='kafka',  # output directory where the model has been saved
-    seed=None,  # set the seed to any integer to remove randomness (i.e., always produce the same output for the same input)
+    seed=None,  # set it to any integer to remove randomness (i.e., always produce the same output for the same input)
 )
 generated_text = sampler.generate_text(
     prompt='My name is Martin and I am',  # prompt
@@ -250,7 +249,8 @@ Sampler.help_text_config()  # for the arguments to Sampler.generate_text
 #### From a pre-trained model
 
 If you do not want to train a model, as described in the [Training](#Training) section, you can still generate text from
-a pre-trained model available online. After passing `init_from='online'`, you can set `out_dir` to any of those currently supported models:
+a pre-trained model available online. After passing `init_from='online'`, you can set `out_dir` to any of those
+currently supported models:
 
 | `out_dir`     | # layers | # heads | embed dims | # params | size   |
 |---------------|----------|---------|------------|----------|--------|

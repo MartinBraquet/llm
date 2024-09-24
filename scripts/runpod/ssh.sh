@@ -1,1 +1,1 @@
-ssh vdbrc4w6sa5orl-64411783@ssh.runpod.io -i ~/.ssh/runpod
+ssh dcajb7e1283yqb-64410c6a@ssh.runpod.io -i ~/.ssh/runpod

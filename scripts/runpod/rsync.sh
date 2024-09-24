@@ -2,10 +2,10 @@
 
 set -e
 
-IP=66.114.112.70
+IP=204.15.42.29
 
-folders=( "llm" "runpod" "pyproject.toml" )
+folders=( "llm" "demo" "scripts/runpod" "pyproject.toml" )
 
 for folder in "${folders[@]}"; do
-  rsync -rvz -e 'ssh -p 59016 -i ~/.ssh/runpod' --progress --exclude '*.pt' --exclude '__pycache__*' ../$folder root@$IP:/workspace
+  rsync -rvz -e 'ssh -o StrictHostKeyChecking=no -p 29111 -i ~/.ssh/runpod' --progress --exclude '*.pt' --exclude '__pycache__*' ../../$folder root@$IP:/workspace
 done

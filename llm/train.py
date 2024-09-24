@@ -151,6 +151,9 @@ class Trainer:
         self.ddp_world_size = 1
         self.ddp_local_rank = None
 
+    def resume(self):
+        self.config.init_from = 'resume'
+
     @classmethod
     def help_config(cls):
         help(TrainingConfig)
@@ -314,7 +317,7 @@ class Trainer:
                 print(f"found vocab_size = {meta_vocab_size}")
 
         # When to save the init model (cannot save it just after initialization)
-        iter_save_init_ckpt = 0 if config.init_from.startswith('gpt2') else min(config.eval_interval, 10)
+        iter_save_init_ckpt = 1 if config.init_from.startswith('gpt2') else min(config.eval_interval, 10)
 
         # model init
         checkpoint = None
@@ -501,6 +504,8 @@ class Trainer:
                             message += f", mfu {running_mfu * 100:.2f}%"
                     print(message)
                 local_iter_num += 1
+
+        print(f"Training done, best_val_loss = {best_val_loss}")
 
 
 if __name__ == '__main__':
