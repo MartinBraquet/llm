@@ -14,6 +14,8 @@ from llm.configurator import FileConfig, get_relevant_config
 from llm.model import GPT
 from llm.utils import ModelLoader, unbox, DataclassUtils, get_default_device, to_path
 
+DEFAULT_PROMPT = "\n"
+
 DIR = Path(__file__).parent
 
 
@@ -42,6 +44,10 @@ class ModelConfig(FileConfig):
         if self.device is None:
             self.device = get_default_device()
 
+    @property
+    def model_name(self):
+        return Path(self.out_dir).stem
+
 
 @dataclass
 class TextConfig(DataclassUtils):
@@ -53,7 +59,7 @@ class TextConfig(DataclassUtils):
     :param temperature: 1.0 = no change, < 1.0 = less random, > 1.0 = more random, in predictions
     :param top_k: retain only the top_k most likely tokens, clamp others to have 0 probability
     """
-    prompt: str = "\n"
+    prompt: str = DEFAULT_PROMPT
     num_samples: int = 1
     max_tokens: int = 100
     temperature: float = 1.0
