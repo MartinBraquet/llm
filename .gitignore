@@ -3,6 +3,7 @@
 .ipynb_checkpoints/
 .vscode
 .conda
+.coverage
 __pycache__/
 *.bin
 *.pkl
