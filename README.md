@@ -17,13 +17,13 @@ for building and training an LLM, of any size, on any training text, such as a b
 fine-tune a GPT2 model by influencing it with any text you provide. Any of those trained models can then be used to
 generate text.
 
-![demo.gif](demo/demo.gif)
-
 * [Demo](#demo)
 * [Installation](#installation)
 * [Usage](#usage)
 * [Feedback](#feedback)
 * [Contributions](#contributions)
+
+![demo.gif](demo/demo.gif)
 
 ## Demo
 
