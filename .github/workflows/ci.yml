@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Set up a display on Ubuntu, to get the user interface tests working
+      - name: Set up display on Ubuntu  # to get the user interface tests working
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get install xvfb
