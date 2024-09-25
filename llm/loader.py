@@ -19,7 +19,8 @@ DATA_DIR = BASE_DIR / 'data'
 
 @lru_cache
 def get_data_paths():
-    return json.load(open(DATA_DIR / 'data_paths.json'))
+    with open(DATA_DIR / 'data_paths.json') as f:
+        return json.load(f)
 
 
 def save_txt_file(data, name):

@@ -26,7 +26,8 @@ class FileConfig(DataclassUtils):
                     f"Config file does not exist in any of {', '.join(paths)}. "
                     f"If you gave a relative path, make sure it is relative to the directory where this script is run."
                 )
-            config = json.load(open(self.config_file))
+            with open(self.config_file) as f:
+                config = json.load(f)
             for k, v in config.items():
                 if not hasattr(self, k):
                     raise ValueError(f"Unknown config key: {k}")
