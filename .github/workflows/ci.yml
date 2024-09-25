@@ -23,7 +23,7 @@ jobs:
 
       - name: Set up a display on Ubuntu, to get the user interface tests working
         if: matrix.os == 'ubuntu-latest'
-        run:
+        run: |
           sudo apt-get install xvfb
           echo "DISPLAY=:99.0" >> $GITHUB_ENV
           echo "Xvfb :99 -screen 0 1280x1024x24 &" >> $GITHUB_ENV
