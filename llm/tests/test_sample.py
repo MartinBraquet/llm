@@ -17,7 +17,7 @@ def patch_multinomial_sampling(probs, num_samples):
     Using np.random.multinomial allows for reproducibility. But since is less efficient (need to share memory between
     CPU and GPU), we stick to torch.multinomial in production.
     """
-    probs = np.array(probs[0]).astype(np.float64)
+    probs = probs[0].cpu().numpy().astype(np.float64)
     probs /= probs.sum()
     idx_next = torch.asarray([[np.argmax(np.random.multinomial(num_samples, probs, size=1)[0])]])
     return idx_next
