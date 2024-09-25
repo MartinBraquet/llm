@@ -1,13 +1,7 @@
 import os
-from functools import cache
-from pathlib import Path
 from unittest import TestCase
 
-from llm import BASE_DIR
 from llm.cache.disk import get_disk
-from llm.sample import generate_text, Sampler
-
-DIR = Path(__file__).parent
 
 
 class TestDiskcache(TestCase):
@@ -37,4 +31,3 @@ class TestDiskcache(TestCase):
                 os.environ['LLM_DISK_PATH'] = current_path
             else:
                 del os.environ['LLM_DISK_PATH']
-
