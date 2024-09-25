@@ -59,6 +59,9 @@ class TrainingConfig(FileConfig):
     :param min_lr: minimum learning rate. should be ~= learning_rate/10 per Chinchilla
     :param backend: DDP backend. 'nccl', 'gloo', etc.
     :param patience: how many unimproved evals to wait before early stopping
+    :param profile: if True, use torch profiler
+    :param profile_dir: directory to store the profiles
+    :param synchronize: host-device synchronization, for proper benchmarking of compute time per step
     """
     out_dir: Path = 'out'
     training_data_path: str = None
@@ -99,6 +102,9 @@ class TrainingConfig(FileConfig):
     min_lr: float = 6e-5
     backend: str = 'nccl'
     patience: int = 5
+    profile: bool = False
+    profile_dir: str = 'profile_logs'
+    synchronize: bool = False
 
     def __post_init__(self):
         super().__post_init__()
@@ -378,7 +384,7 @@ class Trainer:
         self.model.to(self.device)
 
         # initialize a GradScaler. If enabled=False scaler is a no-op
-        scaler = torch.amp.GradScaler(device=self.device, enabled=(config.dtype == 'float16'))
+        scaler = torch.amp.GradScaler(device=self.device, enabled=config.dtype == 'float16')
 
         # optimizer
         optimizer = self.model.configure_optimizers(
@@ -390,14 +396,14 @@ class Trainer:
 
         if config.init_from == 'resume':
             optimizer.load_state_dict(checkpoint['optimizer'])
-        checkpoint = None  # free up memory
+        del checkpoint
 
         # compile the model
         if config.torch_compile:
             print("compiling the model...")
             self.model = torch.compile(self.model)  # requires PyTorch 2.0
 
-        with self._ddp_ctx():
+        with self._ddp_ctx(), self._profile_ctx() as prof:
 
             # logging
             if config.wandb_log and self.master_process:
@@ -411,6 +417,7 @@ class Trainer:
             raw_model = self.model.module if self.ddp else self.model  # unwrap DDP container if needed
             running_mfu = None
             val_loss_not_improved_count = 0
+            self._synchronize()
             for iter_num in range(start_iter_num, config.max_iters):
                 lr = self._get_lr(iter_num)
                 for param_group in optimizer.param_groups:
@@ -503,9 +510,41 @@ class Trainer:
                             running_mfu = mfu if running_mfu is None else 0.9 * running_mfu + 0.1 * mfu
                             message += f", mfu {running_mfu * 100:.2f}%"
                     print(message)
+
                 local_iter_num += 1
+                if prof is not None:
+                    prof.step()
+
+            self._synchronize()
 
         print(f"Training done, best_val_loss = {best_val_loss}")
+
+    def _profile_ctx(self):
+        """
+        Useful docs on pytorch profiler:
+        - tutorial https://pytorch.org/tutorials/intermediate/tensorboard_profiler_tutorial.html
+        - api https://pytorch.org/docs/stable/profiler.html#torch.profiler.profile
+        """
+        if not self.config.profile:
+            return nullcontext()
+        skip_first, wait, warmup, active = 0, 1, 1, self.config.max_iters
+        activities = [torch.profiler.ProfilerActivity.CPU]
+        if self.is_cuda:
+            activities.append(torch.profiler.ProfilerActivity.CUDA)
+        return torch.profiler.profile(
+            activities=activities,
+            schedule=torch.profiler.schedule(skip_first=skip_first, wait=wait, warmup=warmup, active=active, repeat=1),
+            on_trace_ready=torch.profiler.tensorboard_trace_handler(self.config.profile_dir),
+            record_shapes=True,
+            profile_memory=True,
+            with_stack=True,  # incurs an additional overhead, disable if not needed
+            with_flops=True,
+            with_modules=False,
+        )
+
+    def _synchronize(self):
+        if self.config.synchronize:
+            torch.cuda.synchronize(device=self.device)
 
 
 if __name__ == '__main__':

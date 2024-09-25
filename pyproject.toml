@@ -17,6 +17,8 @@ dependencies = [
     "diskcache",
     "tiktoken",
     "torch",
+    "HolisticTraceAnalysis",
+    "torch_tb_profiler",
     "transformers",
     "numpy",
     "datasets",

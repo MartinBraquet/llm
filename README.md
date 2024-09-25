@@ -186,7 +186,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 ### Main Installation
 
 ```shell
-pip install -e "."
+pip install -e .
 ```
 
 ## Usage
@@ -280,6 +280,24 @@ from llm.sample import Sampler
 
 sampler = Sampler(init_from='online', out_dir='gpt2')
 print(sampler.generate_text(prompt='Today I decided to'))
+```
+
+### Profiling
+
+You can also profile (memory, CPU and GPU usage, etc.) and benchmark the training process via:
+
+```python
+Trainer(
+    profile=True,
+    profile_dir='profile_logs',
+    ...
+)
+```
+
+Then you can launch tensorboard and open http://localhost:6006 in your browser to watch in real time (or after hand) the training process.
+
+```shell
+tensorboard --logdir=profile_logs
 ```
 
 ## Tests
