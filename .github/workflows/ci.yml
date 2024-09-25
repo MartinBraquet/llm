@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macOS-latest]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
         python-version: ["3.10", "3.11"]
 
     steps:
@@ -21,11 +21,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Set up a display on Ubuntu, to get the user interface tests working
+        if: matrix.os == 'ubuntu-latest'
+        run:
+          sudo apt-get install xvfb
+          echo "DISPLAY=:99.0" >> $GITHUB_ENV
+          echo "Xvfb :99 -screen 0 1280x1024x24 &" >> $GITHUB_ENV
+          
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+
       - name: Install dependencies
         run: pip install .
 
       - name: Run tests
-        run: pytest llm --cov=llm --cov-report=xml
+        run: pytest llm
 
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
