@@ -25,9 +25,10 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get install xvfb
-          export DISPLAY=:99.0
+          echo "DISPLAY=:99.0" >> $GITHUB_ENV
           Xvfb :99 -screen 0 1024x768x16 &
           
+          # Installing the CPU version of torch, just to make the tests faster
           pip install torch --index-url https://download.pytorch.org/whl/cpu
 
       - name: Install dependencies
