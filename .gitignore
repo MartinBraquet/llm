@@ -15,6 +15,7 @@ venv/
 *.ipynb
 *.pdf
 *.txt
+*.webm
 *egg-info
 nanoGPT/
 ng-video-lecture/
