@@ -4,8 +4,18 @@
 [![CD](https://github.com/MartinBraquet/llm/actions/workflows/cd.yml/badge.svg)](https://github.com/MartinBraquet/llm/actions/workflows/cd.yml)
 [![Coverage](https://codecov.io/gh/MartinBraquet/llm/branch/main/graph/badge.svg)](https://codecov.io/gh/MartinBraquet/llm)
 
-Some experiments with large language models from scratch (i.e., without using any external resources such as the OpenAI
-API).
+Large language models (LLM) are machine-learning tools for text generation. Their key advantage, beside their
+performance leap after reaching a certain model size, lies in their attention mechanism, proposed in the paper entitled
+Attention is All you Need.
+
+This work builds LLMs from scratch, implementing the full neural network, including encoding, embedding,
+attention heads, and multilayer perceptrons. It does not rely on any external resources such as the OpenAI
+API.
+
+Apart from the educational purpose of exploring the underlying components of such a famous AI system, the package allows
+for building and training an LLM, of any size, on any training text, such as a book, a webpage, etc. It can also
+fine-tune a GPT2 model by influencing it with any text you provide. Any of those trained models can then be used to
+generate text.
 
 * [Demo](#demo)
 * [Installation](#installation)
