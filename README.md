@@ -6,7 +6,7 @@
 
 Large language models (LLM) are machine-learning tools for text generation. Their key advantage, beside their
 performance leap after reaching a certain model size, lies in their attention mechanism, proposed in the paper entitled
-Attention is All you Need.
+[Attention is All you Need](https://proceedings.neurips.cc/paper_files/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf).
 
 This work builds LLMs from scratch, implementing the full neural network, including encoding, embedding,
 attention heads, and multilayer perceptrons. It does not rely on any external resources such as the OpenAI
