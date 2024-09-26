@@ -14,19 +14,19 @@ description = "Large Language Model"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "diskcache",
-    "tiktoken",
-    "torch",
     "HolisticTraceAnalysis",
-    "torch_tb_profiler",
-    "transformers",
-    "numpy",
     "datasets",
-    "wandb",
-    "tqdm",
-    "notebook",
+    "diskcache",
     "ipywidgets",
+    "notebook",
+    "numpy",
     "pytest",
     "pytest-cov",
     "pytest-env",
+    "tiktoken",
+    "torch",
+    "torch_tb_profiler",
+    "tqdm",
+    "transformers",
+    "wandb",
 ]
