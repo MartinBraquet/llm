@@ -201,9 +201,8 @@ One can train a model from scratch via:
 from llm.train import Trainer
 
 trainer = Trainer(
-    out_dir='kafka',  # output directory where the model will be saved
-    dataset='kafka',  # dataset name
-    training_data_path='https://www.gutenberg.org/cache/epub/5200/pg5200.txt',  # dataset URL or local path
+    model_path='results/tolstoy',  # output directory where the model will be saved
+    training_data_path='https://www.gutenberg.org/cache/epub/2600/pg2600.txt',  # dataset URL or local path
     eval_interval=10,  # when to evaluate the model
     batch_size=4,  # batch size
     block_size=16,  # block size (aka context length)
@@ -223,13 +222,11 @@ It should take a few minutes to train on a typical CPU (8-16 cores), and it is m
 Note that there are many more parameters to tweak, if desired. See all of them in the doc:
 
 ```python
-from llm.train import Trainer
-
-Trainer.help_config()
+help(Trainer)
 ```
 
 It will stop training when the evaluation loss stops improving. Once done, one can generate text from it; see the next
-section below (setting the appropriate value for `out_dir`, e.g., `'kafka'`).
+section below (setting the appropriate value for `model_path`, e.g., `'tolstoy'`).
 
 ### Text Generation
 
@@ -239,11 +236,10 @@ One can generate text from a trained model via:
 from llm.sample import Sampler
 
 sampler = Sampler(
-    out_dir='kafka',  # output directory where the model has been saved
-    seed=None,  # set it to any integer to remove randomness (i.e., always produce the same output for the same input)
+    model_path='results/tolstoy',  # output directory where the model has been saved
 )
 generated_text = sampler.generate_text(
-    prompt='My name is Martin and I am',  # prompt
+    prompt='He decided to',  # prompt
     max_tokens=100,  # number of tokens to generate
 )
 print(generated_text)
@@ -252,19 +248,17 @@ print(generated_text)
 To access all the parameters for text generation, see the doc:
 
 ```python
-from llm.sample import Sampler
-
-Sampler.help_model_config()  # for the arguments to Sampler
-Sampler.help_text_config()  # for the arguments to Sampler.generate_text
+help(Sampler.__init__)  # for the arguments to Sampler
+help(Sampler.help_text_config)  # for the arguments to Sampler.generate_text
 ```
 
 #### From a pre-trained model
 
 If you do not want to train a model, as described in the [Training](#Training) section, you can still generate text from
-a pre-trained model available online. After passing `init_from='online'`, you can set `out_dir` to any of those
+a pre-trained model available online. After passing `init_from='online'`, you can set `model_path` to any of those
 currently supported models:
 
-| `out_dir`     | # layers | # heads | embed dims | # params | size   |
+| `model_path`     | # layers | # heads | embed dims | # params | size   |
 |---------------|----------|---------|------------|----------|--------|
 | `gpt2`        | 12       | 12      | 768        | 124M     | 500 MB |
 | `gpt2-medium` | 24       | 16      | 1024       | 350M     | 1.4 GB |
@@ -276,9 +270,7 @@ Note that the first time you use a model, it needs to be downloaded from the int
 Example:
 
 ```python
-from llm.sample import Sampler
-
-sampler = Sampler(init_from='online', out_dir='gpt2')
+sampler = Sampler(init_from='online', model_path='gpt2')
 print(sampler.generate_text(prompt='Today I decided to'))
 ```
 
