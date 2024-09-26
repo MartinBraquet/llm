@@ -4,9 +4,15 @@ from contextlib import contextmanager
 
 import pytest
 
+from llm.cache.disk import is_windows_os
+
 
 @contextmanager
 def set_posix_windows():
+    if not is_windows_os():
+        yield
+        return
+
     posix_backup = pathlib.PosixPath
     try:
         pathlib.PosixPath = pathlib.WindowsPath
