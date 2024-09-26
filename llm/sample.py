@@ -8,7 +8,6 @@ import numpy as np
 import tiktoken
 import torch
 
-from llm import BASE_DIR
 from llm.configurator import load_config_file
 from llm.model import GPT
 from llm.utils import ModelLoader, unbox, get_default_device, to_path, parse_model_path, MISSING
@@ -40,10 +39,11 @@ class ML:
     ):
         """
         :param device: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
-        :param seed: random seed
+        :param seed: random seed. set it to any integer to remove randomness (i.e., always produce the same output for
+            the same input)
         :param torch_compile: use PyTorch 2.0 to compile the model to be faster
         :param dtype: 'float32', 'bfloat16', or 'float16', the latter will auto implement a GradScaler
-        :param model_path: output directory
+        :param model_path: directory to load the model
         :param config_file: config file to load
         """
         self.__dict__.update(_DEFAULT_CONFIG)
@@ -132,12 +132,8 @@ class Sampler(ML):
         **kwargs
     ):
         """
-        :param model_path: output directory, ignored if init_from is not 'resume'
         :param checkpoint_name: name of the checkpoint to load, ignored if init_from is not 'resume'
         :param init_from: either 'resume' (from a local model_path) or 'online' (from HuggingFace hub)
-        :param seed: random seed
-        :param torch_compile: use PyTorch 2.0 to compile the model to be faster
-        :param device: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
         """
         super().__init__(**kwargs)
         self.checkpoint_name = checkpoint_name
