@@ -1,8 +1,8 @@
 import hashlib
 import os
-from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 import torch
 
@@ -33,10 +33,12 @@ def parse_model_path(model_path):
     return model_path
 
 
-def unbox(e):
+def unbox(e: Any):
     """
     Returns the only element of e if it has only one element, otherwise returns e
 
+    >>> unbox('ab')
+    'ab
     >>> unbox(1)
     1
     >>> unbox([1])
