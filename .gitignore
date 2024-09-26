@@ -4,6 +4,7 @@
 .vscode
 .conda
 .coverage
+coverage.xml
 __pycache__/
 *.bin
 *.pkl

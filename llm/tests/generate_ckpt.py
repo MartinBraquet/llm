@@ -1,7 +1,7 @@
 import torch
 
 from llm.train import Trainer
-from llm.utils import ModelLoader
+from llm.loader import ModelLoader
 
 
 def main():

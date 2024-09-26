@@ -11,10 +11,10 @@ import torch
 from torch.distributed import init_process_group, destroy_process_group
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-from llm.loader import load_data
+from llm.loader import load_data, ModelLoader
 from llm.model import GPTConfig, GPT
-from llm.sample import ML
-from llm.utils import ModelLoader, MISSING, make_dir
+from llm.utils import MISSING, make_dir
+from llm.ml import ML
 
 DIR = Path(__file__).parent
 

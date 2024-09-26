@@ -4,9 +4,7 @@ from functools import lru_cache
 
 import diskcache as dc
 
-
-def is_windows_os() -> bool:
-    return os.name == 'nt'
+from llm.utils import is_windows_os
 
 
 class DiskCache:

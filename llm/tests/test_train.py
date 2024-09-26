@@ -33,3 +33,5 @@ class TestTrain(TestCase):
         }
         trainer = Trainer(**config)
         trainer.run()
+
+        self.assertFalse(trainer.resume())

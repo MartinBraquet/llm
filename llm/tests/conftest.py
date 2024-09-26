@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 import pytest
 
-from llm.cache.disk import is_windows_os
+from llm.utils import is_windows_os
 
 
 @contextmanager
