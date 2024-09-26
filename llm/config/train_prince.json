@@ -1,7 +1,7 @@
 {
   "init_from": "scratch",
-  "model_path": "prince-medium",
-  "dataset": "prince",
+  "model_path": "results/prince-medium",
+  "training_data_path": "prince",
   "always_save_checkpoint": true,
   "log_interval": 10,
   "eval_interval": 100,

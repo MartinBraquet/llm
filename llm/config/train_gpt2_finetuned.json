@@ -1,7 +1,7 @@
 {
   "init_from": "gpt2-xl",
-  "model_path": "gpt2_finetuned",
-  "dataset": "prince",
+  "model_path": "results/gpt2_finetuned",
+  "training_data_path": "prince",
   "eval_interval": 20,
   "eval_iters": 10,
   "log_interval": 2,
