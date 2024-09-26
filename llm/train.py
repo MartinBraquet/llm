@@ -247,11 +247,23 @@ class Trainer(ML):
         self.seed_offset = 0
         self.model = None
         self.data_dir = None
+        self.start_iter_num = 0
+        self.best_val_loss = 1e9
 
         # is this a distributed data parallel run (multiple GPU nodes)?
         self.ddp = int(os.environ.get('RANK', -1)) != -1
         self.ddp_world_size = 1
         self.ddp_local_rank = None
+
+        self.model_args = dict(
+            n_layer=self.n_layer,
+            n_head=self.n_head,
+            n_embd=self.n_embd,
+            block_size=self.block_size,
+            bias=self.bias,
+            vocab_size=0,
+            dropout=self.dropout,
+        )  # start with model_args from command line
 
         make_dir(self.model_path)
 
@@ -370,99 +382,10 @@ class Trainer(ML):
             encoding=self.encoding,
         )
 
-        # init these up here, can override if init_from='resume' (i.e. from a checkpoint)
-        start_iter_num = 0
-        best_val_loss = 1e9
-
-        # attempt to derive vocab_size from the dataset
-        meta_vocab_size = None
-        meta_path = self.data_dir / 'meta.pkl'
-        if os.path.exists(meta_path):
-            with open(meta_path, 'rb') as f:
-                meta = pickle.load(f)
-            stoi, itos = meta.get('stoi'), meta.get('itos')
-            if stoi is not None and itos is not None:
-                assert len(stoi) == len(itos), f"{len(stoi)} != {len(itos)}"
-                meta_vocab_size = len(stoi)
-                print(f"found vocab_size = {meta_vocab_size}")
-
         # When to save the init model (cannot save it just after initialization)
         iter_save_init_ckpt = 1 if self.init_from.startswith('gpt2') else min(self.eval_interval, 10)
 
-        # model init
-        checkpoint = None
-        model_args = dict(
-            n_layer=self.n_layer,
-            n_head=self.n_head,
-            n_embd=self.n_embd,
-            block_size=self.block_size,
-            bias=self.bias,
-            vocab_size=0,
-            dropout=self.dropout,
-        )  # start with model_args from command line
-        if self.init_from == 'scratch':
-            # init a new model from scratch
-            print("Initializing a new model from scratch")
-            # determine the vocab size we'll use for from-scratch training
-            if meta_vocab_size is not None:
-                model_args['vocab_size'] = meta_vocab_size
-            else:
-                print("defaulting to vocab_size of GPT-2 to 50304 (50257 rounded up for efficiency)")
-                model_args['vocab_size'] = 50304
-            gpt_conf = GPTConfig(**model_args)
-            self.model = GPT(gpt_conf)
-        elif self.init_from == 'resume':
-            print(f"Resuming training from {self.model_path}")
-            # resume training from a checkpoint.
-            model_loader = ModelLoader(
-                model_path=self.model_path,
-                device=self.device,
-                dropout=self.dropout,
-            )
-            self.model = model_loader.load()
-            checkpoint = model_loader.checkpoint
-
-            # force these config attributes to be equal otherwise we can't even resume training
-            # the rest of the attributes (e.g. dropout) can stay as desired from command line
-            model_args = model_loader.checkpoint['model_args']
-
-            start_iter_num = model_loader.checkpoint['iter_num']
-            best_val_loss = model_loader.checkpoint['best_val_loss']
-        elif self.init_from.startswith('gpt2'):
-            print(f"Initializing from OpenAI GPT-2 weights: {self.init_from}")
-            # initialize from OpenAI GPT-2 weights
-            override_args = dict(dropout=self.dropout)
-            self.model = GPT.from_pretrained(self.init_from, override_args)
-            # read off the created config params, so we can store them into checkpoint correctly
-            for k in model_args.keys():
-                if k not in override_args:
-                    model_args[k] = getattr(self.model.config, k)
-        else:
-            raise ValueError(f"unknown init_from option: {self.init_from}")
-
-        # crop down the model block size if desired, using model surgery
-        if self.block_size < self.model.config.block_size:
-            self.model.crop_block_size(self.block_size)
-            model_args['block_size'] = self.block_size  # so that the checkpoint will have the right value
-
-        self.model.to(self.device)
-
-        # initialize a GradScaler. If enabled=False scaler is a no-op
-        scaler = torch.amp.GradScaler(device=self.device, enabled=self.dtype == 'float16')
-
-        # optimizer
-        optimizer = self.model.configure_optimizers(
-            weight_decay=self.weight_decay,
-            learning_rate=self.learning_rate,
-            betas=(self.beta1, self.beta2),
-            device_type=self.device_type,
-        )
-
-        if self.init_from == 'resume':
-            optimizer.load_state_dict(checkpoint['optimizer'])
-        del checkpoint
-
-        self.compile_model()
+        optimizer, scaler = self.load_model()
 
         with self._ddp_ctx(), self._profile_ctx() as prof:
 
@@ -479,7 +402,7 @@ class Trainer(ML):
             running_mfu = None
             val_loss_not_improved_count = 0
             self._synchronize()
-            for iter_num in range(start_iter_num, self.max_iters):
+            for iter_num in range(self.start_iter_num, self.max_iters):
                 lr = self._get_lr(iter_num)
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = lr
@@ -497,19 +420,19 @@ class Trainer(ML):
                             "lr": lr,
                             "mfu": running_mfu * 100 if running_mfu is not None else None,  # convert to percentage
                         })
-                    val_loss_improved = losses['val'] < best_val_loss
+                    val_loss_improved = losses['val'] < self.best_val_loss
                     if val_loss_improved:
                         val_loss_not_improved_count = 0
                     else:
                         val_loss_not_improved_count += 1
                     if (val_loss_improved or self.always_save_checkpoint) and iter_num > 0:
-                        best_val_loss = losses['val']
+                        self.best_val_loss = losses['val']
                         checkpoint = {
                             'model': raw_model.state_dict(),
                             'optimizer': optimizer.state_dict(),
-                            'model_args': model_args,
+                            'model_args': self.model_args,
                             'iter_num': iter_num,
-                            'best_val_loss': best_val_loss,
+                            'best_val_loss': self.best_val_loss,
                             'config': self.get_config(),
                         }
                         if iter_num == iter_save_init_ckpt:
@@ -578,7 +501,81 @@ class Trainer(ML):
 
             self._synchronize()
 
-        print(f"Training done, best_val_loss = {best_val_loss}")
+        print(f"Training done, best_val_loss = {self.best_val_loss}")
+
+    def load_model(self):
+        checkpoint = None
+        if self.init_from == 'scratch':
+            # init a new model from scratch
+            print("Initializing a new model from scratch")
+
+            # attempt to derive vocab_size from the dataset
+            meta_vocab_size = None
+            meta_path = self.data_dir / 'meta.pkl'
+            if os.path.exists(meta_path):
+                with open(meta_path, 'rb') as f:
+                    meta = pickle.load(f)
+                stoi, itos = meta.get('stoi'), meta.get('itos')
+                if stoi is not None and itos is not None:
+                    assert len(stoi) == len(itos), f"{len(stoi)} != {len(itos)}"
+                    meta_vocab_size = len(stoi)
+                    print(f"found vocab_size = {meta_vocab_size}")
+
+            # determine the vocab size we'll use for from-scratch training
+            if meta_vocab_size is not None:
+                self.model_args['vocab_size'] = meta_vocab_size
+            else:
+                print("defaulting to vocab_size of GPT-2 to 50304 (50257 rounded up for efficiency)")
+                self.model_args['vocab_size'] = 50304
+            gpt_conf = GPTConfig(**self.model_args)
+            self.model = GPT(gpt_conf)
+        elif self.init_from == 'resume':
+            print(f"Resuming training from {self.model_path}")
+            # resume training from a checkpoint.
+            model_loader = ModelLoader(
+                model_path=self.model_path,
+                device=self.device,
+                dropout=self.dropout,
+            )
+            self.model = model_loader.load()
+            checkpoint = model_loader.checkpoint
+
+            # force these config attributes to be equal otherwise we can't even resume training
+            # the rest of the attributes (e.g. dropout) can stay as desired from command line
+            self.model_args = model_loader.checkpoint['model_args']
+
+            self.start_iter_num = model_loader.checkpoint['iter_num']
+            self.best_val_loss = model_loader.checkpoint['best_val_loss']
+        elif self.init_from.startswith('gpt2'):
+            print(f"Initializing from OpenAI GPT-2 weights: {self.init_from}")
+            # initialize from OpenAI GPT-2 weights
+            override_args = dict(dropout=self.dropout)
+            self.model = GPT.from_pretrained(self.init_from, override_args)
+            # read off the created config params, so we can store them into checkpoint correctly
+            for k in self.model_args.keys():
+                if k not in override_args:
+                    self.model_args[k] = getattr(self.model.config, k)
+        else:
+            raise ValueError(f"unknown init_from option: {self.init_from}")
+        # crop down the model block size if desired, using model surgery
+        if self.block_size < self.model.config.block_size:
+            self.model.crop_block_size(self.block_size)
+            self.model_args['block_size'] = self.block_size  # so that the checkpoint will have the right value
+        self.model.to(self.device)
+        # initialize a GradScaler. If enabled=False scaler is a no-op
+        scaler = torch.amp.GradScaler(device=self.device, enabled=self.dtype == 'float16')
+        # optimizer
+        optimizer = self.model.configure_optimizers(
+            weight_decay=self.weight_decay,
+            learning_rate=self.learning_rate,
+            betas=(self.beta1, self.beta2),
+            device_type=self.device_type,
+        )
+        if self.init_from == 'resume':
+            optimizer.load_state_dict(checkpoint['optimizer'])
+        del checkpoint
+        self.compile_model()
+        return optimizer, scaler
 
     def _profile_ctx(self):
         """
@@ -609,6 +606,4 @@ class Trainer(ML):
 
 
 if __name__ == '__main__':
-    config_file = DIR / 'config' / 'train.json'
-    trainer = Trainer(config_file=config_file)
-    trainer.run()
+    Trainer(config_file='train.json').run()

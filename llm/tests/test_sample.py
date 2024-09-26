@@ -29,7 +29,7 @@ class TestSample(TestCase):
         torch.manual_seed(0)
 
     def test_sample(self):
-        sampler = Sampler(model_path=model_path)
+        sampler = Sampler(model_path=model_path, torch_compile=True)
         text = sampler.generate_text(prompt='Love is the answer to', max_tokens=20)
         self.assertEqual('Love is the answer toN4fpPLbNK\\9A3Necys\n"', text)
 
