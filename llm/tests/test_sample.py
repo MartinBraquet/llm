@@ -25,6 +25,8 @@ def patch_multinomial_sampling(probs, num_samples):
 
 @patch('torch.multinomial', patch_multinomial_sampling)
 class TestSample(TestCase):
+    def setUp(self):
+        torch.manual_seed(0)
 
     def test_sample(self):
         sampler = Sampler(model_path=model_path)
