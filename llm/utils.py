@@ -97,12 +97,6 @@ def list_to_hash(items):
 
 
 def to_path(s):
-    """
-    >>> to_path('a')
-    PosixPath('a')
-    >>> to_path(Path('a'))
-    PosixPath('a')
-    """
     if isinstance(s, str):
         return Path(s)
     return s

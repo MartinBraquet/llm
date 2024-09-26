@@ -18,3 +18,7 @@ class TestUtils(TestCase):
             Path(tmpdir, 'ckpt_init.pt').touch()
             Path(tmpdir, 'ckpt_0002.pt').touch()
             self.assertEqual('ckpt_0002.pt', get_last_checkpoint(tmpdir))
+
+    def test_path(self):
+        self.assertEqual(Path('a'), to_path('a'))
+        self.assertEqual(Path('a'), to_path(Path('a')))

@@ -35,7 +35,7 @@ jobs:
         run: pip install .
 
       - name: Run tests
-        run: pytest llm --cov-report=xml
+        run: pytest llm --cov=llm --cov-report=xml
 
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
