@@ -33,7 +33,7 @@ class TestSample(TestCase):
         text = sampler.generate_text(prompt='Love is the answer to', max_tokens=20)
         self.assertEqual('Love is the answer toN4fpPLbNK\\9A3Necys\n"', text)
 
-    def test_sample_from_file(self):
+    def test_config_file(self):
         config_file = DIR / 'config.json'
         text = Sampler(config_file=config_file, model_path=model_path).generate_text(max_tokens=20)
         self.assertEqual('\nN4fpPLbNK\\9A3Necys\n"', text)
@@ -42,3 +42,8 @@ class TestSample(TestCase):
         sampler = Sampler(init_from='online', model_path='gpt2')
         text = sampler.generate_text(prompt='The sun', max_tokens=10)
         self.assertEqual('The sun has been shining for weeks, but it has set', text)
+
+    def test_file_prompt(self):
+        sampler = Sampler(model_path=model_path)
+        text = sampler.generate_text(prompt='FILE:prompt.txt', max_tokens=10)
+        self.assertEqual(23, len(text))

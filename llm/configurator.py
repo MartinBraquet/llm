@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from llm import BASE_DIR
-from llm.utils import DataclassUtils
 
 
 # @dataclass

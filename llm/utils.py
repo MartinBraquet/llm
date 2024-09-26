@@ -36,34 +36,49 @@ def parse_model_path(model_path):
 def unbox(e):
     """
     Returns the only element of e if it has only one element, otherwise returns e
+
+    >>> unbox(1)
+    1
+    >>> unbox([1])
+    1
+    >>> unbox([1, 2, 3])
+    [1, 2, 3]
+    >>> unbox({'a': 1})
+    1
+    >>> unbox({'a': 1, 'b': 2})
+    {'a': 1, 'b': 2}
     """
     if isinstance(e, str):
         return e
+    default = e
     if isinstance(e, dict):
         e = e.values()
-    return next(iter(e)) if hasattr(e, '__len__') and len(e) == 1 else e
+    return next(iter(e)) if hasattr(e, '__len__') and len(e) == 1 else default
 
 
 def box(e):
     """
     Box a single element into a list
-    :param e:
-    :return:
+
+    >>> box(1)
+    [1]
+    >>> box([1])
+    [1]
     """
     if isinstance(e, (list, tuple, set)):
         return e
     return [e]
 
 
-@dataclass
-class DataclassUtils:
-
-    @classmethod
-    def keys(cls):
-        return list(cls.__dataclass_fields__)
-
-    def dict(self):
-        return {k: getattr(self, k) for k in self.keys()}
+# @dataclass
+# class DataclassUtils:
+#
+#     @classmethod
+#     def keys(cls):
+#         return list(cls.__dataclass_fields__)
+#
+#     def dict(self):
+#         return {k: getattr(self, k) for k in self.keys()}
 
 
 @lru_cache
@@ -82,6 +97,12 @@ def list_to_hash(items):
 
 
 def to_path(s):
+    """
+    >>> to_path('a')
+    PosixPath('a')
+    >>> to_path(Path('a'))
+    PosixPath('a')
+    """
     if isinstance(s, str):
         return Path(s)
     return s

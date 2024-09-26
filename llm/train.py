@@ -506,27 +506,16 @@ class Trainer(ML):
     def load_model(self):
         checkpoint = None
         if self.init_from == 'scratch':
-            # init a new model from scratch
             print("Initializing a new model from scratch")
 
-            # attempt to derive vocab_size from the dataset
-            meta_vocab_size = None
-            meta_path = self.data_dir / 'meta.pkl'
-            if os.path.exists(meta_path):
-                with open(meta_path, 'rb') as f:
-                    meta = pickle.load(f)
-                stoi, itos = meta.get('stoi'), meta.get('itos')
-                if stoi is not None and itos is not None:
-                    assert len(stoi) == len(itos), f"{len(stoi)} != {len(itos)}"
-                    meta_vocab_size = len(stoi)
-                    print(f"found vocab_size = {meta_vocab_size}")
-
             # determine the vocab size we'll use for from-scratch training
+            meta_vocab_size = self.get_vocab_size()
             if meta_vocab_size is not None:
                 self.model_args['vocab_size'] = meta_vocab_size
             else:
                 print("defaulting to vocab_size of GPT-2 to 50304 (50257 rounded up for efficiency)")
                 self.model_args['vocab_size'] = 50304
+
             gpt_conf = GPTConfig(**self.model_args)
             self.model = GPT(gpt_conf)
         elif self.init_from == 'resume':
@@ -576,6 +565,21 @@ class Trainer(ML):
         del checkpoint
         self.compile_model()
         return optimizer, scaler
+
+    def get_vocab_size(self):
+        """
+        Attempt to derive vocab_size from the dataset
+        """
+        meta_path = self.data_dir / 'meta.pkl'
+        if os.path.exists(meta_path):
+            with open(meta_path, 'rb') as f:
+                meta = pickle.load(f)
+            stoi, itos = meta.get('stoi'), meta.get('itos')
+            if stoi is not None and itos is not None:
+                assert len(stoi) == len(itos), f"{len(stoi)} != {len(itos)}"
+                meta_vocab_size = len(stoi)
+                print(f"found vocab_size = {meta_vocab_size}")
+                return meta_vocab_size
 
     def _profile_ctx(self):
         """
