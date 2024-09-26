@@ -1,4 +1,3 @@
 {
-  "out_dir": "test",
-  "max_tokens": 20
+  "checkpoint_name": "ckpt.pt"
 }

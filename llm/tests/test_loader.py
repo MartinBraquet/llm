@@ -4,9 +4,9 @@ from unittest import TestCase
 import numpy as np
 
 from llm.loader import load_data
-from llm.sample import generate_text, Sampler
 
 DIR = Path(__file__).parent
+
 
 class TestLoader(TestCase):
 
@@ -15,6 +15,7 @@ class TestLoader(TestCase):
             train_ratio=0.8,
             data_path=DIR / 'training_data.txt',
             return_values=True,
+            name='test_loader_data'
         )
         np.testing.assert_array_equal(
             train_ids,
@@ -24,4 +25,3 @@ class TestLoader(TestCase):
             eval_ids,
             np.array([75, 4835, 7298, 385, 13])
         )
-

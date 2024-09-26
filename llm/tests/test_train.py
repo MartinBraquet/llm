@@ -1,15 +1,18 @@
+from pathlib import Path
 from unittest import TestCase
 
 from llm.train import Trainer
 
+
+DIR = Path(__file__).parent
 
 class TestTrain(TestCase):
 
     def test_train(self):
         config = {
             "init_from": "scratch",
-            "out_dir": "out_test_train",
-            "dataset": "prince",
+            "model_path": DIR / 'results' / ".out_test_train",
+            "training_data_path": "prince",
             "torch_compile": False,
             "log_interval": 9,
             "eval_interval": 10,

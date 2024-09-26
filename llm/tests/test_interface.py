@@ -1,16 +1,19 @@
 import tkinter
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
 from llm.interface import UserInterface
 from llm.sample import Sampler
 
+DIR = Path(__file__).parent
+
 
 class TestInterface(TestCase):
 
     @patch.object(Sampler, 'generate_text', return_value="Hello! How can I help you today?")
     def test_interface(self, sampler_mock):
-        ui = UserInterface(model_path='test')
+        ui = UserInterface(model_path=DIR / 'results' / 'test1')
         ui.user_entry.insert(0, "hello")
         ui.handle_send()
         self.assertEqual(ui.user_entry.get(), "")
