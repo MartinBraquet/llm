@@ -10,7 +10,7 @@ import tiktoken
 
 from llm import BASE_DIR
 from llm.logger import logger
-from llm.utils import str_to_hash, list_to_hash
+from llm.utils import list_to_hash, make_dir
 
 DIR = Path(__file__).parent
 
@@ -23,15 +23,18 @@ def get_data_paths():
         return json.load(f)
 
 
-def save_txt_file(data, name):
-    os.makedirs(DATA_DIR / name, exist_ok=True)
-    input_file_path = DATA_DIR / name / f'{name}.txt'
+def save_txt_file(data, data_dir):
+    input_file_path = data_dir / f'input.txt'
     with open(input_file_path, 'w', encoding='utf-8') as f:
         f.write(data)
 
 
 def is_url(data_path):
     return str(data_path).startswith('http')
+
+
+def is_path(data_path):
+    return os.path.exists(data_path) or is_url(data_path)
 
 
 @lru_cache
@@ -49,32 +52,42 @@ def get_key(
 
 
 def load_data(
-    name: str = 'unnamed',
+    data_path: Path | str,
+    name: str = None,
     train_ratio: float = 0.9,
-    data_path: Path | str = None,
     return_values: bool = False,
     encoding: str = 'gpt2',
-    out_dir: Path | str = None,
 ):
-    logger.info(f"Loading {name} with train_ratio={train_ratio}")
-    if isinstance(out_dir, str):
-        out_dir = Path(out_dir)
-    if data_path is None:
-        data_path = get_data_paths()[name]
+    """
+    :param data_path: path to data or key in data_paths.json
+    :param name: dataset name (used only for the directory name where to store the data)
+    :param train_ratio: what fraction of the data to use for training
+    :param return_values: if True, return the values. if False, return the full data path
+    :param encoding: 'gpt2' or 'char'
+    """
+    assert data_path is not None, "data path must be provided"
+    name = name or 'unnamed'
+    logger.info(f"Loading {data_path} with train_ratio={train_ratio}")
+    if not is_path(data_path):
+        name = data_path
+        data_path = get_data_paths().get(data_path)
+        if data_path is None:
+            raise ValueError(f"Unknown data_path: {data_path}. ")
     key = get_key(
         data_path,
         train_ratio=train_ratio,
         encoding=encoding,
     )
-    data_dir = DATA_DIR / name / key
+    data_dir = Path('data') / name / key
     path_train, path_val = data_dir / 'train.bin', data_dir / 'val.bin'
     cached = os.path.exists(path_train) and os.path.exists(path_val)
     train_ids = val_ids = None
     if not cached:
-        print(f"Downloading {name} data from {data_path}")
+        make_dir(data_dir)
+        print(f"Downloading data from {data_path} ({name=})")
         if is_url(data_path):
             data = requests.get(data_path).text
-            save_txt_file(data=data, name=name)
+            save_txt_file(data=data, data_dir=data_dir)
         else:
             with open(data_path, 'r') as f:
                 data = f.read()
@@ -94,8 +107,7 @@ def load_data(
             print(f"vocab size: {vocab_size:,}")
             stoi = {ch: i for i, ch in enumerate(chars)}
             itos = {i: ch for i, ch in enumerate(chars)}
-            assert out_dir is not None, "out_dir is required for char encoding"
-            with open(out_dir / 'meta.pkl', 'wb') as f:
+            with open(data_dir / 'meta.pkl', 'wb') as f:
                 pickle.dump({'stoi': stoi, 'itos': itos}, f)
             encode = lambda s: [stoi[c] for c in s]
         else:

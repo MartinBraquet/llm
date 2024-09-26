@@ -6,7 +6,7 @@ from llm.sample import Sampler, DEFAULT_PROMPT
 
 class UserInterface:
     def __init__(self, model_path, model_kw=None, text_kw=None):
-        self.sampler = Sampler(out_dir=model_path, **(model_kw or {}))
+        self.sampler = Sampler(model_path=model_path, **(model_kw or {}))
         self.text_kw = text_kw or {}
 
         # Set up the main application window
@@ -62,4 +62,4 @@ class UserInterface:
 
     @property
     def name(self):
-        return self.sampler.config.model_name
+        return self.sampler.model_name

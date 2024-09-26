@@ -12,13 +12,13 @@ from llm.model import GPTConfig, GPT
 DIR = Path(__file__).parent
 
 
-def get_last_checkpoint(out_dir):
+def get_last_checkpoint(model_path):
     """
-    Init from the last checkpoint in the out_dir
+    Init from the last checkpoint in the model_path
     """
-    ckpt_list = [f for f in os.listdir(out_dir) if 'ckpt' in f]
+    ckpt_list = [f for f in os.listdir(model_path) if 'ckpt' in f]
     if not ckpt_list:
-        raise ValueError(f'no checkpoints found in {out_dir}')
+        raise ValueError(f'no checkpoints found in {model_path}')
     if 'ckpt.pt' in ckpt_list:
         return 'ckpt.pt'
     ckpt_list = sorted(ckpt_list)
@@ -28,22 +28,27 @@ def get_last_checkpoint(out_dir):
     return checkpoint_name
 
 
+def parse_model_path(model_path):
+    if not isinstance(model_path, Path):
+        model_path = Path(model_path)
+    # if not model_path.is_absolute():
+    #     model_path = DIR / 'results' / model_path
+    return model_path
+
+
 class ModelLoader:
     def __init__(
         self,
-        out_dir: Path | str,
+        model_path: Path | str,
         checkpoint_name: str = 'last',
         device: str = 'cuda',
         dropout: Optional[float] = None
     ):
-        if not isinstance(out_dir, Path):
-            out_dir = Path(out_dir)
-        if not out_dir.is_absolute():
-            out_dir = DIR / 'results' / out_dir
+        model_path = parse_model_path(model_path)
         if checkpoint_name == 'last':
-            checkpoint_name = get_last_checkpoint(out_dir)
+            checkpoint_name = get_last_checkpoint(model_path)
         self.checkpoint_name = checkpoint_name
-        self.ckpt_path = out_dir / checkpoint_name
+        self.ckpt_path = model_path / checkpoint_name
         print(f'Using model in {self.ckpt_path}')
         if device.startswith('cuda') and not torch.cuda.is_available():
             device = 'cpu'
@@ -139,3 +144,15 @@ def to_path(s):
     if isinstance(s, str):
         return Path(s)
     return s
+
+
+def make_dir(name):
+    os.makedirs(name, exist_ok=True)
+
+
+class Missing:
+    def __repr__(self):
+        return 'MISSING'
+
+
+MISSING = Missing()

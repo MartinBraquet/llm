@@ -14,20 +14,7 @@ class FileConfig(DataclassUtils):
 
     def __post_init__(self):
         if self.config_file is not None:
-            if not isinstance(self.config_file, Path):
-                self.config_file = Path(self.config_file)
-            paths = []
-            if not os.path.exists(self.config_file):
-                paths.append(str(self.config_file))
-                self.config_file = BASE_DIR / 'config' / self.config_file
-            if not os.path.exists(self.config_file):
-                paths.append(str(self.config_file))
-                raise ValueError(
-                    f"Config file does not exist in any of {', '.join(paths)}. "
-                    f"If you gave a relative path, make sure it is relative to the directory where this script is run."
-                )
-            with open(self.config_file) as f:
-                config = json.load(f)
+            config = load_config_file(self.config_file)
             for k, v in config.items():
                 if not hasattr(self, k):
                     raise ValueError(f"Unknown config key: {k}")
@@ -53,3 +40,21 @@ def get_relevant_config(subclass, config):
     keys = set(relevant_keys) & set(all_keys)
     relevant_config = {k: getattr(config, k) for k in keys}
     return relevant_config
+
+
+def load_config_file(config_file) -> dict:
+    if not isinstance(config_file, Path):
+        config_file = Path(config_file)
+    paths = []
+    if not os.path.exists(config_file):
+        paths.append(str(config_file))
+        config_file = BASE_DIR / 'config' / config_file
+    if not os.path.exists(config_file):
+        paths.append(str(config_file))
+        raise ValueError(
+            f"Config file does not exist in any of {', '.join(paths)}. "
+            f"If you gave a relative path, make sure it is relative to the directory where this script is run."
+        )
+    with open(config_file) as f:
+        config = json.load(f)
+    return config
