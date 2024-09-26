@@ -38,7 +38,7 @@ def unbox(e: Any):
     Returns the only element of e if it has only one element, otherwise returns e
 
     >>> unbox('ab')
-    'ab
+    'ab'
     >>> unbox(1)
     1
     >>> unbox([1])
