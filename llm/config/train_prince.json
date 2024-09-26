@@ -1,6 +1,6 @@
 {
   "init_from": "scratch",
-  "out_dir": "prince-medium",
+  "model_path": "prince-medium",
   "dataset": "prince",
   "always_save_checkpoint": true,
   "log_interval": 10,
