@@ -292,6 +292,17 @@ Then you can launch tensorboard and open http://localhost:6006 in your browser t
 tensorboard --logdir=profile_logs
 ```
 
+### User Interface
+
+A simple user interface (UI) is also available:
+
+```python
+from llm.interface import UserInterface
+
+ui = UserInterface(model_path='gpt2', model_kw=dict(init_from='online'))
+ui.run()
+```
+
 ## Tests
 
 ```shell
